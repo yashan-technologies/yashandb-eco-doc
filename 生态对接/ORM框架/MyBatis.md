@@ -4,12 +4,13 @@ MyBatis是一款基于Java的持久层框架，它支持自定义SQL、存储过
 
 在进行对接操作前，您需要先准备好如下事项（以下版本不做严格要求，可按照需要灵活选择）：
 
-1. 已安装Jdk8或Jdk11的Java应用环境
-2. 已安装Springboot 2.6
-3. 已安装Maven 3.8
-4. 已安装Mybatis 3.2
-5. 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包
-6. 已存在一个可正常访问的YashanDB服务端。
+- 已安装Jdk8或Jdk11的Java应用环境。
+
+- 已安装Springboot 2.6。
+- 已安装Maven 3.8。
+- 已安装Mybatis 3.2。
+- 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包。
+- 已存在一个可正常访问的YashanDB服务端。
 
 ## 对接配置
 
@@ -17,43 +18,44 @@ MyBatis是一款基于Java的持久层框架，它支持自定义SQL、存储过
 
 1. 检查Maven核心配置文件pom.xml中是否指定了如下依赖项，没有则加上：
 
-```xml
- <dependencies>
+    ```xml
+    <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+            </dependency>
+
+    <!--        Mybatis-plus-->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>3.5.2</version>
+            </dependency>
+
+        <!--        test-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
-
-<!--        Mybatis-plus-->
+        
+        <!-- lombok  -->
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.2</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
 
-    <!--        test-->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-test</artifactId>
-        <scope>test</scope>
-    </dependency>
-    
-    <!-- lombok  -->
-    <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-    </dependency>
+        </dependencies>
+    ```
 
-    </dependencies>
-```
+2. 以IDEA编辑器为例，从IDEA的菜单中，选择【 File > Project Structure > Libraries】。
 
-2. 以IDEA编辑器为例，从IDEA的菜单中，选择【 File > Project Structure > Libraries】
-3. 点击【+】，并选择【Java】，从本地选择已准备的YashanDB JDBC驱动包完成库添加；如为多模块项目，只需要选择相应的模块执行本操作。
+3. 单击【+】，并选择【Java】，从本地选择已准备的YashanDB JDBC驱动包完成库添加；如为多模块项目，只需要选择相应的模块执行本操作。
 4. 本文采用Springboot最常用的方式导入数据源，即通过application.yml导入，并以Springboot自带的Hikari连接池为例进行数据源配置。
 
-::: tabs
+    ::: tabs
 
-== 单数据源配置
+    == 单数据源配置
 
 请将下例中的your_host、your_port、your_username和your_password修改为实际值。
 
@@ -66,7 +68,7 @@ spring:
     password: your_password
 ```
 
-== 多数据源配置
+    == 多数据源配置
 
 多数据源配置采用dynamic-datasource-spring-boot-starter，本文以YashanDB与MySQL两个数据源（可自行选择其他数据源）为例，进行两个数据源的切换。请将下例中的your_host、your_port、 dbname、your_username和your_password修改为实际值。
 
@@ -89,7 +91,7 @@ spring:
           password: your_password
 ```
 
-:::
+    :::
 
 ## 简单使用示例
 
@@ -97,81 +99,80 @@ spring:
 
 1. 在YashanDB中创建如下表对象：
 
-```sql
--- 建表语句
-CREATE TABLE user1 
-(
-	id INT PRIMARY KEY,
-	name VARCHAR(30) NULL
-);
--- 预置5条数据
-INSERT INTO USER1 (id, name) VALUES
-(1, 'Jone'),
-(2, 'Jack',),
-(3, 'Tom',),
-(4, 'Sandy'),
-(5, 'Billie');
-```
+    ```sql
+    -- 建表语句
+    CREATE TABLE user1 
+    (
+        id INT PRIMARY KEY,
+        name VARCHAR(30) NULL
+    );
+    -- 预置5条数据
+    INSERT INTO USER1 (id, name) VALUES
+    (1, 'Jone'),
+    (2, 'Jack',),
+    (3, 'Tom',),
+    (4, 'Sandy'),
+    (5, 'Billie');
+    ```
 
 2. 创建User实体类，并使其与YashanDB的user1表对应：
 
-```java
-import lombok.Data;
+    ```java
+    import lombok.Data;
 
-@Data
-public class User {
-    private Long id;
-    private String name;
-}
-```
+    @Data
+    public class User {
+        private Long id;
+        private String name;
+    }
+    ```
 
 3. 创建User的Mapper文件：
 
-```xml
-<!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.dao.UserMapper">
-    <select id="getAllUsers" resultType="com.example.pojo.User">
-        select * from user1
-    </select>
-    <insert id="insertUser" parameterType="com.example.pojo.User">
-        insert into user1(id,name) values(#{id},#{name})
-    </insert>
+    ```xml
+    <!DOCTYPE mapper
+            PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <mapper namespace="com.example.dao.UserMapper">
+        <select id="getAllUsers" resultType="com.example.pojo.User">
+            select * from user1
+        </select>
+        <insert id="insertUser" parameterType="com.example.pojo.User">
+            insert into user1(id,name) values(#{id},#{name})
+        </insert>
 
-</mapper>
-
-```
+    </mapper>
+    ```
 
 4. 定义mapper对应的java接口文件：
 
-```java
-import java.util.List;
+    ```java
+    import java.util.List;
 
-@Mapper
-public interface UserMapper {
-    List<User> getAllUsers();
-    void insertUser(User user);
-}
-```
-
-5. 创建单元测试类
-
-```java
-public class UserTest {
-
-    @Autowired
-    private UserMapper userMapper;
-    
-    @Test
-    public void testAddUser() {
-        assertEquals(5, userMapper.getAllUsers().size());// 建表时预置了5条数据
-        userMapper.insertUser(new User(20,"zhang"));
-        List<User> list = userMapper.getAllUsers();
-        assertEquals(6, list.size());
+    @Mapper
+    public interface UserMapper {
+        List<User> getAllUsers();
+        void insertUser(User user);
     }
-}
-```
+    ```
+
+5. 创建单元测试类：
+
+    ```java
+    public class UserTest {
+
+        @Autowired
+        private UserMapper userMapper;
+        
+        @Test
+        public void testAddUser() {
+            assertEquals(5, userMapper.getAllUsers().size());// 建表时预置了5条数据
+            userMapper.insertUser(new User(20,"zhang"));
+            List<User> list = userMapper.getAllUsers();
+            assertEquals(6, list.size());
+        }
+    }
+    ```
 
 ## 常见问题
 
@@ -180,6 +181,7 @@ public class UserTest {
 一般情况下YashanDB里自增主键都是通过序列实现的，而MyBatis使用自增主键主要分为以下情形：
 
 * 情形一：插入语句中不带id，让服务端通过序列自动生成id。
+
 * 情形二：插入语句中不带id，让服务端通过序列自动生成id，并且在语句执行结束后返回所生成的id。
 
 情形一中无需做任何配置，只要数据库里定义表结构时指定自增序列，以及mapper.xml在定义SQL语句时不带主键直接插入即可。
@@ -221,6 +223,7 @@ mapper.xml示例
 需注意的是，YashanDB仅支持获取单行插入语句的返回值，在多行插入时，若使用了useGeneratedKeys等参数来返回主键值将会发生报错。解决办法为：
 
 - 去掉useGeneratedKeys等参数。
+
 - 采取别的办法实现多行插入并获取返回值，例如把多行插入改造成单行插入然后在Java代码里循环处理。
 
 #### CLOB序列化成JSON时报错
@@ -231,7 +234,7 @@ mapper.xml示例
 Type definition error: [simple type, class com.yashandb.jdbc.YasLobInputStream]; nested exception is com.fasterxml.jackson.databind.exc.InvalidDefinitionException:No serializer found for class com.yashandb.jdbc.YasLobInputStream and no properties discovered to create BeanSerializer(to avoid exception, disable SerializationFeature.FAIL_ON_EMPTY_BEANS)(through reference chain: com.lead.common.core.domain.AjaxResult["data"]->java.util.ArrayList[0]->com.lead.common.core.domain.vo.ComboBoxVo["value"]->com.alibaba.druid.proxy.jdbc.ClobProxyImpl["asciiStream"])
 ```
 
-解决办法为，在定义实体类时，将数据库中的CLOB类型字段直接定义成String，而将数据库中的BLOB类型字段直接定义成byte[]，如下所示：
+解决办法：在定义实体类时，将数据库中的CLOB类型字段直接定义成String，而将数据库中的BLOB类型字段直接定义成byte[]，如下所示：
 
 ```java
 import lombok.Data;

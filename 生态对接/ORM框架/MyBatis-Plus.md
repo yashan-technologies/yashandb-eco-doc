@@ -4,12 +4,13 @@ MyBatis-Plus是Mybatis的增强版，且比Mybatis更易使用。本文将以构
 
 在进行对接操作前，您需要先准备好如下事项（以下版本不做严格要求，可按照需要灵活选择）：
 
-1. 已安装Jdk8或Jdk11的Java应用环境
-2. 已安装Springboot 2.6
-3. 已安装Maven 3.8
-4. 已安装MyBatis-Plus 3.8
-5. 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包
-6. 已存在一个可正常访问的YashanDB服务端。
+- 已安装Jdk8或Jdk11的Java应用环境。
+
+- 已安装Springboot 2.6。
+- 已安装Maven 3.8。
+- 已安装MyBatis-Plus 3.8。
+- 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包。
+- 已存在一个可正常访问的YashanDB服务端。
 
 ## 对接配置
 
@@ -17,43 +18,44 @@ MyBatis-Plus是Mybatis的增强版，且比Mybatis更易使用。本文将以构
 
 1. 检查Maven核心配置文件pom.xml中是否指定了如下依赖项，没有则加上：
 
-```xml
- <dependencies>
+    ```xml
+    <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+            </dependency>
+
+    <!--        Mybatis-plus-->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>3.5.2</version>
+            </dependency>
+
+        <!--        test-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
-
-<!--        Mybatis-plus-->
+        
+        <!-- lombok  -->
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.2</version>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
 
-    <!--        test-->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-test</artifactId>
-        <scope>test</scope>
-    </dependency>
-    
-    <!-- lombok  -->
-    <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-    </dependency>
+        </dependencies>
+    ```
 
-    </dependencies>
-```
+2. 以IDEA编辑器为例，从IDEA的菜单中，选择【 File > Project Structure > Libraries】。
 
-2. 以IDEA编辑器为例，从IDEA的菜单中，选择【 File > Project Structure > Libraries】
-3. 点击【+】，并选择【Java】，从本地选择已准备的YashanDB JDBC驱动包完成库添加；如为多模块项目，只需要选择相应的模块执行本操作。
+3. 单击【+】，并选择【Java】，从本地选择已准备的YashanDB JDBC驱动包完成库添加；如为多模块项目，只需要选择相应的模块执行本操作。
 4. 本文采用Springboot最常用的方式导入数据源，即通过application.yml导入，并以Springboot自带的Hikari连接池为例进行数据源配置。
 
-::: tabs
+    ::: tabs
 
-== 单数据源配置
+    == 单数据源配置
 
 请将下例中的your_host、your_port、your_username和your_password修改为实际值。
 
@@ -66,7 +68,7 @@ spring:
     password: your_password
 ```
 
-== 多数据源配置
+    == 多数据源配置
 
 多数据源配置采用dynamic-datasource-spring-boot-starter，本文以YashanDB与MySQL两个数据源（可自行选择其他数据源）为例，进行两个数据源的切换。请将下例中的your_host、your_port、 dbname、your_username和your_password修改为实际值。
 
@@ -89,7 +91,7 @@ spring:
           password: your_password
 ```
 
-:::
+    :::
 
 ## 简单使用示例
 
@@ -97,253 +99,253 @@ spring:
 
 1. 在YashanDB中创建如下表对象：
 
-```sql
--- 建表语句
-CREATE TABLE user1
-(
-    id INT PRIMARY KEY,
-    name VARCHAR(30) NULL
-);
--- 预置5条数据
-INSERT INTO USER1 (id, name) VALUES
-     (1, 'Jone'),
-     (2, 'Jack'),
-     (3, 'Tom'),
-     (4, 'Sandy'),
-     (5, 'Billie');
-```
+    ```sql
+    -- 建表语句
+    CREATE TABLE user1
+    (
+        id INT PRIMARY KEY,
+        name VARCHAR(30) NULL
+    );
+    -- 预置5条数据
+    INSERT INTO USER1 (id, name) VALUES
+        (1, 'Jone'),
+        (2, 'Jack'),
+        (3, 'Tom'),
+        (4, 'Sandy'),
+        (5, 'Billie');
+    ```
 
 2. 创建User实体类，并使其与YashanDB的user1表对应：
 
-```java
-import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
+    ```java
+    import com.baomidou.mybatisplus.annotation.*;
+    import lombok.Data;
 
-@Data
-@TableName("user1")
-public class User {
-    @TableId(type = IdType.AUTO)
-    private Long id;
-    private String name;
-}
-```
+    @Data
+    @TableName("user1")
+    public class User {
+        @TableId(type = IdType.AUTO)
+        private Long id;
+        private String name;
+    }
+    ```
 
 3. 定义mapper对应的java接口文件：
 
-```java
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.samples.quickstart.entity.User;
-import org.apache.ibatis.annotations.Mapper;
+    ```java
+    import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+    import com.baomidou.mybatisplus.samples.quickstart.entity.User;
+    import org.apache.ibatis.annotations.Mapper;
 
-import java.util.List;
+    import java.util.List;
 
-@Mapper
-public interface UserMapper extends BaseMapper<User> {
-    List<User> selectUsers();
-}
-```
+    @Mapper
+    public interface UserMapper extends BaseMapper<User> {
+        List<User> selectUsers();
+    }
+    ```
 
 4. 创建单元测试类：
 
-```java
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.samples.quickstart.entity.User;
-import com.baomidou.mybatisplus.samples.quickstart.mapper.UserMapper;
-import com.zaxxer.hikari.HikariDataSource;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+    ```java
+    import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+    import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+    import com.baomidou.mybatisplus.samples.quickstart.entity.User;
+    import com.baomidou.mybatisplus.samples.quickstart.mapper.UserMapper;
+    import com.zaxxer.hikari.HikariDataSource;
+    import org.junit.jupiter.api.Test;
+    import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.annotation.Resource;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+    import javax.annotation.Resource;
+    import java.sql.*;
+    import java.util.ArrayList;
+    import java.util.HashMap;
+    import java.util.List;
 
-@SpringBootTest
-public class QuickStartTest {
-    @Resource
-    private UserMapper userMapper;
+    @SpringBootTest
+    public class QuickStartTest {
+        @Resource
+        private UserMapper userMapper;
 
-    @Test
-    public void testSelect() {
-        System.out.println(("----- selectAll method test ------"));
-        List<User> userList = userMapper.selectList(null);
-        userList.forEach(System.out::println);
+        @Test
+        public void testSelect() {
+            System.out.println(("----- selectAll method test ------"));
+            List<User> userList = userMapper.selectList(null);
+            userList.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect2(){
+            User user = userMapper.selectById(1L);
+            System.out.println(user);
+        }
+        
+        @Test
+        public void testInsertUser() {
+            userMapper.insert(new User(1001L,"aaaa"));
+            User user = userMapper.selectById(1001L);
+            System.out.println(user);
+        }
+
+        @Test
+        public void testSelect4(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> allEq = wrapper.allEq(new HashMap<String, Object>() {{
+                put("id", 1);
+                put("name", "Jone");
+            }}, true);
+
+            List<User> users = userMapper.selectList(allEq);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect5(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> eq = wrapper.eq("name", "Jone");
+            List<User> users = userMapper.selectList(eq);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect6(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> ne = wrapper.ne("id", 1L);
+            List<User> users = userMapper.selectList(ne);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect7(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> gt = wrapper.gt("id", 2L);
+            List<User> users = userMapper.selectList(gt);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect8(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> ge = wrapper.ge("id", 2L);
+            List<User> users = userMapper.selectList(ge);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect9(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> between = wrapper.between("id", 2L, 4L);
+            List<User> users = userMapper.selectList(between);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect10(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> between = wrapper.notBetween("id", 3L, 4L);
+            List<User> users = userMapper.selectList(between);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect11(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> like = wrapper.like("name", "J");
+            List<User> users = userMapper.selectList(like);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect12(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> like = wrapper.notLike("name", "J");
+            List<User> users = userMapper.selectList(like);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect13(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> like = wrapper.likeLeft("name", "J");
+            List<User> users = userMapper.selectList(like);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect14(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> like = wrapper.likeRight("name", "J");
+            List<User> users = userMapper.selectList(like);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect15(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> id = wrapper.isNotNull("id");
+            List<User> users = userMapper.selectList(id);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect16(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> id = wrapper.isNull("id");
+            List<User> users = userMapper.selectList(id);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect17(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> in = wrapper.in("id", new ArrayList<Long>(){{
+                add(1L);
+                add(2L);
+            }});
+            List<User> users = userMapper.selectList(in);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect18(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            QueryWrapper<User> inSql = wrapper.inSql("id", "select id from user1 where id < 4");
+            List<User> users = userMapper.selectList(inSql);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect21(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            wrapper.func(i -> {
+                if (false) {
+                    i.eq("id", 1);
+                }else {
+                    i.eq("id", 2);
+                }
+            });
+
+            List<User> users = userMapper.selectList(wrapper);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect22(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            wrapper.eq("id", 1).or().likeRight("name", "J");
+            List<User> users = userMapper.selectList(wrapper);
+            users.forEach(System.out::println);
+        }
+
+        @Test
+        public void testSelect23(){
+            QueryWrapper<User>  wrapper = new QueryWrapper<>();
+            wrapper.and(i -> i.eq("id", 1).likeRight("name", "J"));
+            List<User> users = userMapper.selectList(wrapper);
+            users.forEach(System.out::println);
+        }
     }
-
-    @Test
-    public void testSelect2(){
-        User user = userMapper.selectById(1L);
-        System.out.println(user);
-    }
-    
-    @Test
-    public void testInsertUser() {
-        userMapper.insert(new User(1001L,"aaaa"));
-        User user = userMapper.selectById(1001L);
-        System.out.println(user);
-    }
-
-    @Test
-    public void testSelect4(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> allEq = wrapper.allEq(new HashMap<String, Object>() {{
-            put("id", 1);
-            put("name", "Jone");
-        }}, true);
-
-        List<User> users = userMapper.selectList(allEq);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect5(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> eq = wrapper.eq("name", "Jone");
-        List<User> users = userMapper.selectList(eq);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect6(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> ne = wrapper.ne("id", 1L);
-        List<User> users = userMapper.selectList(ne);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect7(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> gt = wrapper.gt("id", 2L);
-        List<User> users = userMapper.selectList(gt);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect8(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> ge = wrapper.ge("id", 2L);
-        List<User> users = userMapper.selectList(ge);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect9(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> between = wrapper.between("id", 2L, 4L);
-        List<User> users = userMapper.selectList(between);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect10(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> between = wrapper.notBetween("id", 3L, 4L);
-        List<User> users = userMapper.selectList(between);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect11(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> like = wrapper.like("name", "J");
-        List<User> users = userMapper.selectList(like);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect12(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> like = wrapper.notLike("name", "J");
-        List<User> users = userMapper.selectList(like);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect13(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> like = wrapper.likeLeft("name", "J");
-        List<User> users = userMapper.selectList(like);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect14(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> like = wrapper.likeRight("name", "J");
-        List<User> users = userMapper.selectList(like);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect15(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> id = wrapper.isNotNull("id");
-        List<User> users = userMapper.selectList(id);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect16(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> id = wrapper.isNull("id");
-        List<User> users = userMapper.selectList(id);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect17(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> in = wrapper.in("id", new ArrayList<Long>(){{
-            add(1L);
-            add(2L);
-        }});
-        List<User> users = userMapper.selectList(in);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect18(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        QueryWrapper<User> inSql = wrapper.inSql("id", "select id from user1 where id < 4");
-        List<User> users = userMapper.selectList(inSql);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect21(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        wrapper.func(i -> {
-            if (false) {
-                i.eq("id", 1);
-            }else {
-                i.eq("id", 2);
-            }
-        });
-
-        List<User> users = userMapper.selectList(wrapper);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect22(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        wrapper.eq("id", 1).or().likeRight("name", "J");
-        List<User> users = userMapper.selectList(wrapper);
-        users.forEach(System.out::println);
-    }
-
-    @Test
-    public void testSelect23(){
-        QueryWrapper<User>  wrapper = new QueryWrapper<>();
-        wrapper.and(i -> i.eq("id", 1).likeRight("name", "J"));
-        List<User> users = userMapper.selectList(wrapper);
-        users.forEach(System.out::println);
-    }
-}
-```
+    ```
 
 ## 常见问题
 

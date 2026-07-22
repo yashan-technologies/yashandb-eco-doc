@@ -4,12 +4,13 @@ Debezium是一款开源的基于变更数据捕获（CDC）的分布式平台，
 
 在进行对接操作前，您需要先准备好如下事项：
 
-1. 已安装Jdk11及以上的Java应用环境
-2. 已安装Kafka 2.x/3.x，以及对应版本的Apache Zookeeper和Kafka Connect
-3. 已下载debezium-connector-oracle-2.4.2.Final-plugin依赖包，参考[Maven中央仓库](https://repo1.maven.org/maven2/io/debezium/debezium-connector-oracle/2.4.2.Final/debezium-connector-oracle-2.4.2.Final-plugin.tar.gz)
-5. 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包和YStream组件包
-6. 已向我们的技术支持人员获取YashanDB Debezium Connector组件包
-7. 已存在一个可正常访问的YashanDB服务端。
+- 已安装Jdk11及以上的Java应用环境。
+
+- 已安装Kafka 2.x/3.x，以及对应版本的Apache Zookeeper和Kafka Connect。
+- 已下载debezium-connector-oracle-2.4.2.Final-plugin依赖包，参考[Maven中央仓库](https://repo1.maven.org/maven2/io/debezium/debezium-connector-oracle/2.4.2.Final/debezium-connector-oracle-2.4.2.Final-plugin.tar.gz)。
+- 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包和YStream组件包。
+- 已向我们的技术支持人员获取YashanDB Debezium Connector组件包。
+- 已存在一个可正常访问的YashanDB服务端。
 
 ## 对接配置
 
@@ -17,61 +18,60 @@ Debezium是一款开源的基于变更数据捕获（CDC）的分布式平台，
 
 1. 找到Kafka软件的安装目录，在其下创建plugins目录：
 
-```bash
-$ cd /.../kafka
-$ mkdir plugins
-```
+    ```bash
+    $ cd /.../kafka
+    $ mkdir plugins
+    ```
 
 2. 进入plugins目录，创建debezium-connector-yashandb目录：
 
-```bash
-$ cd plugins
-$ mkdir debezium-connector-yashandb
-```
+    ```bash
+    $ cd plugins
+    $ mkdir debezium-connector-yashandb
+    ```
 
 3. 解压debezium-connector-oracle-2.4.2.Final-plugin依赖包内容至plugins/debezium-connector-yashandb目录：
 
-
-```bash
-$ cd debezium-connector-yashandb
-$ tar zxf /.../debezium-connector-oracle-2.4.2.Final-plugin.tar.gz -C ./
-```
+    ```bash
+    $ cd debezium-connector-yashandb
+    $ tar zxf /.../debezium-connector-oracle-2.4.2.Final-plugin.tar.gz -C ./
+    ```
 
 4. 删除目录下debezium-connector-oracle-2.4.2.Final.jar文件：
 
-```bash
-$ rm debezium-connector-oracle-2.4.2.Final.jar
-```
+    ```bash
+    $ rm debezium-connector-oracle-2.4.2.Final.jar
+    ```
 
-5. 将YashanDB JDBC驱动包、YStream组件包和YashanDB Debezium Connector组件包（均为jar包）放至plugins/debezium-connector-yashandb目录下
+5. 将YashanDB JDBC驱动包、YStream组件包和YashanDB Debezium Connector组件包（均为jar包）放至plugins/debezium-connector-yashandb目录下。
 
 6. 返回到kafka目录层级，进入config目录，编辑目录下的connect-distributed.properties配置文件，定义plugin.path配置项的值为plugins目录路径：
 
-```bash
-$ cd ../../config
-$ vi connect-distributed.properties
+    ```bash
+    $ cd ../../config
+    $ vi connect-distributed.properties
 
-plugin.path=/.../kafka/plugins
-```
+    plugin.path=/.../kafka/plugins
+    ```
 
 7. 重启Kafka Connect进程：
 
-```plaintext
-$ cd ..
-$ ./bin/connect-distributed.sh config/connect-distributed.properties
-```
+    ```plaintext
+    $ cd ..
+    $ ./bin/connect-distributed.sh config/connect-distributed.properties
+    ```
 
 8. 浏览器访问`http://kafka_hostname:8083/connector-plugins`，如果有如下YashanDBConnector，即YashanDB connector部署成功。
 
-```json
-[
-  {
-    "class": "io.debezium.connector.yashandb.YashanDBConnector",
-    "type": "source",
-    "version": "2.4.2.4.3"
-  }
-]
-```
+    ```json
+    [
+    {
+        "class": "io.debezium.connector.yashandb.YashanDBConnector",
+        "type": "source",
+        "version": "2.4.2.4.3"
+    }
+    ]
+    ```
 
 ## 使用简介
 
@@ -83,76 +83,76 @@ $ ./bin/connect-distributed.sh config/connect-distributed.properties
 
 1. 配置Ystream内存池（请将streamPoolSize修改为实际值）：
 
-```sql
-ALTER SYSTEM SET STREAM_POOL_SIZE = streamPoolSize;
-```
-
+    ```sql
+    ALTER SYSTEM SET STREAM_POOL_SIZE = streamPoolSize;
+    ```
 
 2. 按需开启库级或表级附加日志（请将tablename修改为实际值）：
 
-```sql
---当您需要监听库下全部对象时（包含新增对象），可开全库附加日志
-ALTER DATABASE ADD SUPPLEMENTAL LOG TABLE TYPE (HEAP);
-ALTER DATABASE ADD SUPPLEMENTAL LOG DATA ( ALL) COLUMNS;
+    ```sql
+    --当您需要监听库下全部对象时（包含新增对象），可开全库附加日志
+    ALTER DATABASE ADD SUPPLEMENTAL LOG TABLE TYPE (HEAP);
+    ALTER DATABASE ADD SUPPLEMENTAL LOG DATA ( ALL) COLUMNS;
 
---当您仅需要监听某些表时，可开启表级附加日志
-ALTER TABLE tablename ADD SUPPLEMENTAL LOG DATA ( ALL ) COLUMNS;
-```
+    --当您仅需要监听某些表时，可开启表级附加日志
+    ALTER TABLE tablename ADD SUPPLEMENTAL LOG DATA ( ALL ) COLUMNS;
+    ```
 
-> **Caution**：
->
-> 不开启附加日志或开启附加日志的对象不正确会导致数据丢失甚至任务失败。
+    > **Caution**：
+    >
+    > 不开启附加日志或开启附加日志的对象不正确会导致数据丢失甚至任务失败。
 
 3. 为YStream服务的连接用户授权（请将connect_user修改为实际值）：
 
-```sql
-GRANT CREATE SESSION TO connect_user;
-GRANT SELECT ON SYS.V_$DATABASE TO connect_user;
-GRANT SELECT ON SYS.V_$TRANSACTION TO connect_user;
-GRANT SELECT ON SYS.V_$YSTREAM_SERVER TO connect_user;
-GRANT FLASHBACK ANY TABLE TO connect_user; 
-GRANT SELECT ANY TABLE TO connect_user;
-GRANT YSTREAM_CAPTURE TO connect_user;
-GRANT ALTER SESSION TO connect_user;
-GRANT SELECT ON SYS.DBA_LOBS TO connect_user;
-GRANT SELECT ON SYS.V_$DATAFILE TO connect_user;
-GRANT SELECT ON SYS.DBA_SEGMENTS TO connect_user;
-GRANT FLASHBACK ON SYS.DBA_SEGMENTS TO connect_user;
-GRANT FLASHBACK ON SYS.DBA_LOBS TO connect_user;
-GRANT SELECT ON SYS.DBA_TABLES TO connect_user;
-GRANT FLASHBACK ON SYS.DBA_TABLES TO connect_user;
-GRANT SELECT ON SYS.DBA_TAB_PARTITIONS TO connect_user;
-GRANT FLASHBACK ON SYS.DBA_TAB_PARTITIONS TO connect_user;
-GRANT SELECT ON SYS.DBA_TAB_SUBPARTITIONS TO connect_user;
-GRANT FLASHBACK ON SYS.DBA_TAB_SUBPARTITIONS TO connect_user; 
-```
+    ```sql
+    GRANT CREATE SESSION TO connect_user;
+    GRANT SELECT ON SYS.V_$DATABASE TO connect_user;
+    GRANT SELECT ON SYS.V_$TRANSACTION TO connect_user;
+    GRANT SELECT ON SYS.V_$YSTREAM_SERVER TO connect_user;
+    GRANT FLASHBACK ANY TABLE TO connect_user; 
+    GRANT SELECT ANY TABLE TO connect_user;
+    GRANT YSTREAM_CAPTURE TO connect_user;
+    GRANT ALTER SESSION TO connect_user;
+    GRANT SELECT ON SYS.DBA_LOBS TO connect_user;
+    GRANT SELECT ON SYS.V_$DATAFILE TO connect_user;
+    GRANT SELECT ON SYS.DBA_SEGMENTS TO connect_user;
+    GRANT FLASHBACK ON SYS.DBA_SEGMENTS TO connect_user;
+    GRANT FLASHBACK ON SYS.DBA_LOBS TO connect_user;
+    GRANT SELECT ON SYS.DBA_TABLES TO connect_user;
+    GRANT FLASHBACK ON SYS.DBA_TABLES TO connect_user;
+    GRANT SELECT ON SYS.DBA_TAB_PARTITIONS TO connect_user;
+    GRANT FLASHBACK ON SYS.DBA_TAB_PARTITIONS TO connect_user;
+    GRANT SELECT ON SYS.DBA_TAB_SUBPARTITIONS TO connect_user;
+    GRANT FLASHBACK ON SYS.DBA_TAB_SUBPARTITIONS TO connect_user;
+    GRANT LOCK ANY TABLE TO connect_user;
+    ```
 
 4. 调用DBMS_YSTREAM_ADM高级包的CREATE函数创建YStream服务（请将serverName、connect_user和start_scn修改为实际值）：
 
-```sql
---start_scn可通过查询select CURRENT_SCN from V$DATABASE获取
-EXEC DBMS_YSTREAM_ADM.CREATE('serverName', 'connect_user', start_scn)
-```
+    ```sql
+    --start_scn可通过查询select CURRENT_SCN from V$DATABASE获取
+    EXEC DBMS_YSTREAM_ADM.CREATE('serverName', 'connect_user', start_scn)
+    ```
 
 5. 调用DBMS_YSTREAM_ADM高级包的ADD_TABLES函数为YStream服务新增解析表名和模式，Debezium将捕获此函数定义的表名和模式，不执行此函数，或函数参数传入NULL表示捕获所有（请将serverName、table和schema修改为实际值）：
 
-```sql
---可同时指定多个表或多个模式
-EXEC DBMS_YSTREAM_ADM.ADD_TABLES('serverName', 'table1,table2', 'schema1,schema2');
-```
+    ```sql
+    --可同时指定多个表或多个模式
+    EXEC DBMS_YSTREAM_ADM.ADD_TABLES('serverName', 'table1,table2', 'schema1,schema2');
+    ```
 
 6. 调用DBMS_YSTREAM_ADM高级包的SET_PARAMETER函数为YStream服务设置相关参数，不执行此函数则使用默认值（请将serverName修改为实际值）：
 
-```sql
---可同时指定多个表或多个模式
-EXEC DBMS_YSTREAM_ADM.SET_PARAMETER('serverName', 'PARALLELISM', '3');
-```
+    ```sql
+    --可同时指定多个表或多个模式
+    EXEC DBMS_YSTREAM_ADM.SET_PARAMETER('serverName', 'PARALLELISM', '3');
+    ```
 
 7. 调用DBMS_YSTREAM_ADM高级包的START函数启动YStream服务（请将serverName修改为实际值）：
 
-```sql
-EXEC DBMS_YSTREAM_ADM.START('serverName');
-```
+    ```sql
+    EXEC DBMS_YSTREAM_ADM.START('serverName');
+    ```
 
 ### 启动Debezium Connector
 
@@ -229,8 +229,8 @@ curl -s -X GET http://localhost:8083/connectors/yashandb-connector/status
 | snapshot.max.threads            | 1                                              | 连接器在执行初始快照时使用的线程数。如需启用并行初始快照，请将属性设置为大于1的值        |
 | schema.history.internal.store.only.captured.tables.ddl | false | 一个布尔值，用于指定连接器是记录架构或数据库中所有表中的架构结构，还是仅记录指定用于捕获的表中的架构结构。<br>指定以下值之一：<br>`false`*（默认）*<br>在数据库快照期间，连接器会记录数据库中所有非系统表的架构数据，包括未指定用于捕获的表。最好保留默认设置。如果稍后决定从最初未指定用于捕获的表中捕获更改，则连接器可以轻松开始从这些表中捕获数据，因为它们的架构结构已存储在架构历史记录主题中。Debezium 需要表的模式历史记录，以便它可以识别发生更改事件时存在的结构。<br>`true`<br>在数据库快照期间，连接器仅记录 Debezium 从中捕获更改事件的表的表模式。如果更改默认值，并且稍后将连接器配置为从数据库中的其他表捕获数据，则连接器缺少从表中捕获更改事件所需的架构信息。 |
 | converters | No default | 配置Debezium的自定义转换器 |
-| \<converter_name>.type | No default | 配置Debezium的自定义转换器的类名 |
-| \<converter_name>.\<param_name> | No default | 自定义转换器的配置，配置信息根据转换器的使用方式来设置 |
+| <converter_name>.type | No default | 配置Debezium的自定义转换器的类名 |
+| <converter_name>.<param_name> | No default | 自定义转换器的配置，配置信息根据转换器的使用方式来设置 |
 | ddl.parse.fail.retry.read.table  | false                                          | 增量DDL解析失败后，处理DML事件时全量读取源表结构分析。schema.history.internal.skip.unparseable.ddl与ddl.parse.fail.retry.read.table均设置为true生效。|
 
 ### 数据类型映射
@@ -302,7 +302,7 @@ curl -s -X GET http://localhost:8083/connectors/yashandb-connector/status
 
 参考连接[Debezium-custom-converters](https://debezium.io/documentation/reference/2.4/development/converters.html#custom-converters)。
 
-下面的示例显示了实现该接口的 Java 类的转换器实现io.debezium.spi.converter.CustomConverter：
+下面的示例显示了实现该接口的Java类的转换器实现io.debezium.spi.converter.CustomConverter：
 
 ```java
 public interface CustomConverter<S, F extends ConvertedField> {
@@ -323,8 +323,9 @@ public interface CustomConverter<S, F extends ConvertedField> {
 
 ```
 
-- interface Converter 接口：将数据从一种类型转换为另一种类型的函数。
-- interface ConverterRegistration 接口：注册转换器的回调。
+- interface Converter接口：将数据从一种类型转换为另一种类型的函数。
+
+- interface ConverterRegistration接口：注册转换器的回调。
 - register(S fieldSchema, Converter converter)：为当前字段注册给定的架构和转换器。不应针对同一字段多次调用。
 - converterFor(F field, ConverterRegistration registration)：注册自定义值和模式转换器以供特定字段使用。
 
@@ -332,18 +333,15 @@ public interface CustomConverter<S, F extends ConvertedField> {
 
 接口的实现CustomConverter必须包括以下方法：
 
-1. configure()
-   1. 将连接器配置中指定的属性传递给转换器实例。该configure方法在连接器初始化时运行。您可以将转换器与多个连接器一起使用，并根据连接器的属性设置修改其行为。
-   2. 该configure方法接受以下参数：
-      1. props
-         包含要传递给转换器实例的属性。每个属性指定用于转换特定类型列的值的格式。
-2. converterFor()
-   1. 注册转换器以处理数据源中的特定列或字段。Debezium 调用该converterFor()方法以提示转换器调用转换registration。该converterFor方法对每一列运行一次。
-   2. 该方法接受以下参数：
-      1. field
-         传递有关所处理字段或列的元数据的对象。列元数据可以包括列或字段的名称、表或集合的名称、数据类型、大小等。
-      2. registration
-         io.debezium.spi.converter.CustomConverter.ConverterRegistration提供目标架构定义和用于转换列数据的代码的类型的对象。registration当源列与转换器应处理的类型匹配时，转换器将调用该参数。调用该register方法为架构中的每个列定义转换器。架构使用 Kafka Connect API 表示SchemaBuilder。将来，将添加独立的架构定义 API。
+- `configure()`：将连接器配置中指定的属性传递给转换器实例。该configure方法在连接器初始化时运行。您可以将转换器与多个连接器一起使用，并根据连接器的属性设置修改其行为。该configure方法接受以下参数：
+
+    - `props`：包含要传递给转换器实例的属性。每个属性指定用于转换特定类型列的值的格式。
+
+- `converterFor()`：注册转换器以处理数据源中的特定列或字段。Debezium 调用该converterFor()方法以提示转换器调用转换registration。该converterFor方法对每一列运行一次。该方法接受以下参数：
+
+    - `field`：传递有关所处理字段或列的元数据的对象。列元数据可以包括列或字段的名称、表或集合的名称、数据类型、大小等。
+
+    - `registration`：io.debezium.spi.converter.CustomConverter.ConverterRegistration提供目标架构定义和用于转换列数据的代码的类型的对象。registration当源列与转换器应处理的类型匹配时，转换器将调用该参数。调用该register方法为架构中的每个列定义转换器。架构使用 Kafka Connect API 表示SchemaBuilder。将来，将添加独立的架构定义API。
 
 ##### Debezium 自定义转换器示例
 
@@ -353,9 +351,10 @@ public interface CustomConverter<S, F extends ConvertedField> {
 
 - 运行该converterFor方法，该方法注册转换器来处理数据类型设置为的源列中的值isbn。
   - STRING根据为属性指定的值识别目标架构schema.name。
-  - 将源列中的 ISBN 数据转换为String值。
 
-示例 1. 一个简单的自定义转换器
+  - 将源列中的ISBN数据转换为String值。
+
+示例1. 一个简单的自定义转换器
 
 ```java
 public static class IsbnConverter implements CustomConverter<SchemaBuilder, RelationalColumn> {
@@ -378,9 +377,9 @@ public static class IsbnConverter implements CustomConverter<SchemaBuilder, Rela
 }
 ```
 
-##### Debezium 和 Kafka Connect API 模块依赖关系
+##### Debezium和Kafka Connect API模块依赖关系
 
-自定义转换器 Java 项目对 Debezium API 和 Kafka Connect API 库模块具有编译依赖项。这些编译依赖项必须包含在您的项目中pom.xml，如以下示例所示：
+自定义转换器Java项目对 Debezium API和Kafka Connect API库模块具有编译依赖项。这些编译依赖项必须包含在您的项目中pom.xml，如以下示例所示：
 
 ```xml
 <dependency>
@@ -395,14 +394,18 @@ public static class IsbnConverter implements CustomConverter<SchemaBuilder, Rela
 </dependency>
 ```
 
-- ${version.debezium}表示 Debezium 连接器的版本，根据connector支持的版本，这里应该是2.4.2.Final。
-- ${version.kafka}代表您环境中的 Apache Kafka 版本。
+- ${version.debezium}表示Debezium连接器的版本，根据connector支持的版本，这里应该是2.4.2.Final。
 
-## kafka 日志文件变更事件格式说明
-Debezium 和 Kafka Connect 是围绕连续的事件消息流设计的。为了方便处理可变事件结构，Kafka Connect 中的每个事件都是自包含的。 每个消息键和值都有两部分：schema和payload。 schema描述了payload的结构，而payload包含实际数据。
+- ${version.kafka}代表您环境中的Apache Kafka版本。
+
+## kafka日志文件变更事件格式说明
+
+Debezium和Kafka Connect是围绕连续的事件消息流设计的。为了方便处理可变事件结构，Kafka Connect中的每个事件都是自包含的。每个消息键和值都有两部分：schema和payload。schema描述了payload的结构，而payload包含实际数据。
+
 默认情况下，每个数据更改事件采用JSON格式进行描述，每个数据更改事件都有一个键和一个值。
 
 ### 表数据变更事件格式说明
+
 如下以test001例表分两种情况进行展示说明。
 ```sql
 CREATE TABLE connect_user.test001 (
@@ -413,528 +416,533 @@ CREATE TABLE connect_user.test001 (
 );
 ```
 
-(1).当debezium从YaShanDB 快照数据迁移时，迁移connect_user.test001表数据时在Kafka 的topic生成的日志变更事件格式如下：
+- 当debezium从YaShanDB快照数据迁移时，迁移connect_user.test001表数据时在Kafka 的topic生成的日志变更事件格式如下：
+    
+    ```json
+    {
+    "schema": {
+        "type": "struct",
+        "fields": [
+        {
+            "type": "struct",
+            "fields": [
+            {
+                "type": "int32",
+                "optional": false,
+                "field": "COL001"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "COL002"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "COL003"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "COL004"
+            }
+            ],
+            "optional": true,
+            "name": "my_topic11040003.CONNECT_USER.TEST001.Value",
+            "field": "before"
+        },
+        {
+            "type": "struct",
+            "fields": [
+            {
+                "type": "int32",
+                "optional": false,
+                "field": "COL001"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "COL002"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "COL003"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "COL004"
+            }
+            ],
+            "optional": true,
+            "name": "my_topic11040003.CONNECT_USER.TEST001.Value",
+            "field": "after"
+        },
+        {
+            "type": "struct",
+            "fields": [
+            {
+                "type": "string",
+                "optional": false,
+                "field": "version"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "connector"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "name"
+            },
+            {
+                "type": "int64",
+                "optional": false,
+                "field": "ts_ms"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "name": "io.debezium.data.Enum",
+                "version": 1,
+                "parameters": {
+                "allowed": "true,last,false,incremental"
+                },
+                "default": "false",
+                "field": "snapshot"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "db"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "sequence"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "schema"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "table"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "txId"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "scn"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "commit_scn"
+            },
+            {
+                "type": "int32",
+                "optional": true,
+                "field": "batch_row_id"
+            },
+            {
+                "type": "int64",
+                "optional": true,
+                "field": "position_scn"
+            },
+            {
+                "type": "int64",
+                "optional": true,
+                "field": "group_lsn"
+            },
+            {
+                "type": "int32",
+                "optional": true,
+                "field": "group_offset"
+            },
+            {
+                "type": "bytes",
+                "optional": true,
+                "field": "instance_id"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "rs_id"
+            },
+            {
+                "type": "int64",
+                "optional": true,
+                "field": "ssn"
+            },
+            {
+                "type": "int32",
+                "optional": true,
+                "field": "redo_thread"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "user_name"
+            }
+            ],
+            "optional": false,
+            "name": "io.debezium.connector.yashandb.Source",
+            "field": "source"
+        },
+        {
+            "type": "string",
+            "optional": false,
+            "field": "op"
+        },
+        {
+            "type": "int64",
+            "optional": true,
+            "field": "ts_ms"
+        },
+        {
+            "type": "struct",
+            "fields": [
+            {
+                "type": "string",
+                "optional": false,
+                "field": "id"
+            },
+            {
+                "type": "int64",
+                "optional": false,
+                "field": "total_order"
+            },
+            {
+                "type": "int64",
+                "optional": false,
+                "field": "data_collection_order"
+            }
+            ],
+            "optional": true,
+            "name": "event.block",
+            "version": 1,
+            "field": "transaction"
+        }
+        ],
+        "optional": false,
+        "name": "my_topic11040003.CONNECT_USER.TEST001.Envelope",
+        "version": 1
+    },
+    "payload": {
+        "before": null,
+        "after": {
+        "COL001": 100001,
+        "COL002": "xxxxxxxxxxxxxxxxxx001",
+        "COL003": "yyyyyyyyyyyyyyyyyyy001",
+        "COL004": null
+        },
+        "source": {
+        "version": "2.4.2.4.3",
+        "connector": "yashandb",
+        "name": "my_topic11040003",
+        "ts_ms": 1762241220117,
+        "snapshot": "last",
+        "db": "",
+        "sequence": null,
+        "schema": "CONNECT_USER",
+        "table": "TEST001",
+        "txId": null,
+        "scn": "755320504801107968",
+        "commit_scn": null,
+        "batch_row_id": 0,
+        "position_scn": 755320504801107969,
+        "group_lsn": 0,
+        "group_offset": 0,
+        "instance_id": "AAAAAAAAAAA=",
+        "rs_id": null,
+        "ssn": 0,
+        "redo_thread": null,
+        "user_name": null
+        },
+        "op": "r",
+        "ts_ms": 1762241282908,
+        "transaction": null
+    }
+    }
+    ```
 
-```json
-{
-  "schema": {
-    "type": "struct",
-    "fields": [
-      {
+- 当debezium从YaShanDB增量数据同步时，同步connect_user.test001表数据时在Kafka 的topic生成的日志变更事件格式如下：
+
+    ```json
+    {
+    "schema": {
         "type": "struct",
         "fields": [
-          {
-            "type": "int32",
-            "optional": false,
-            "field": "COL001"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "COL002"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "COL003"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "COL004"
-          }
-        ],
-        "optional": true,
-        "name": "my_topic11040003.CONNECT_USER.TEST001.Value",
-        "field": "before"
-      },
-      {
-        "type": "struct",
-        "fields": [
-          {
-            "type": "int32",
-            "optional": false,
-            "field": "COL001"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "COL002"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "COL003"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "COL004"
-          }
-        ],
-        "optional": true,
-        "name": "my_topic11040003.CONNECT_USER.TEST001.Value",
-        "field": "after"
-      },
-      {
-        "type": "struct",
-        "fields": [
-          {
-            "type": "string",
-            "optional": false,
-            "field": "version"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "connector"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "name"
-          },
-          {
-            "type": "int64",
-            "optional": false,
-            "field": "ts_ms"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "name": "io.debezium.data.Enum",
-            "version": 1,
-            "parameters": {
-              "allowed": "true,last,false,incremental"
+        {
+            "type": "struct",
+            "fields": [
+            {
+                "type": "int32",
+                "optional": false,
+                "field": "COL001"
             },
-            "default": "false",
-            "field": "snapshot"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "db"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "sequence"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "schema"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "table"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "txId"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "scn"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "commit_scn"
-          },
-          {
-            "type": "int32",
-            "optional": true,
-            "field": "batch_row_id"
-          },
-          {
-            "type": "int64",
-            "optional": true,
-            "field": "position_scn"
-          },
-          {
-            "type": "int64",
-            "optional": true,
-            "field": "group_lsn"
-          },
-          {
-            "type": "int32",
-            "optional": true,
-            "field": "group_offset"
-          },
-          {
-            "type": "bytes",
-            "optional": true,
-            "field": "instance_id"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "rs_id"
-          },
-          {
-            "type": "int64",
-            "optional": true,
-            "field": "ssn"
-          },
-          {
-            "type": "int32",
-            "optional": true,
-            "field": "redo_thread"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "user_name"
-          }
-        ],
-        "optional": false,
-        "name": "io.debezium.connector.yashandb.Source",
-        "field": "source"
-      },
-      {
-        "type": "string",
-        "optional": false,
-        "field": "op"
-      },
-      {
-        "type": "int64",
-        "optional": true,
-        "field": "ts_ms"
-      },
-      {
-        "type": "struct",
-        "fields": [
-          {
-            "type": "string",
-            "optional": false,
-            "field": "id"
-          },
-          {
-            "type": "int64",
-            "optional": false,
-            "field": "total_order"
-          },
-          {
-            "type": "int64",
-            "optional": false,
-            "field": "data_collection_order"
-          }
-        ],
-        "optional": true,
-        "name": "event.block",
-        "version": 1,
-        "field": "transaction"
-      }
-    ],
-    "optional": false,
-    "name": "my_topic11040003.CONNECT_USER.TEST001.Envelope",
-    "version": 1
-  },
-  "payload": {
-    "before": null,
-    "after": {
-      "COL001": 100001,
-      "COL002": "xxxxxxxxxxxxxxxxxx001",
-      "COL003": "yyyyyyyyyyyyyyyyyyy001",
-      "COL004": null
-    },
-    "source": {
-      "version": "2.4.2.4.3",
-      "connector": "yashandb",
-      "name": "my_topic11040003",
-      "ts_ms": 1762241220117,
-      "snapshot": "last",
-      "db": "",
-      "sequence": null,
-      "schema": "CONNECT_USER",
-      "table": "TEST001",
-      "txId": null,
-      "scn": "755320504801107968",
-      "commit_scn": null,
-      "batch_row_id": 0,
-      "position_scn": 755320504801107969,
-      "group_lsn": 0,
-      "group_offset": 0,
-      "instance_id": "AAAAAAAAAAA=",
-      "rs_id": null,
-      "ssn": 0,
-      "redo_thread": null,
-      "user_name": null
-    },
-    "op": "r",
-    "ts_ms": 1762241282908,
-    "transaction": null
-  }
-}
-```
-(2).当debezium从YaShanDB 增量数据同步时，同步connect_user.test001表数据时在Kafka 的topic生成的日志变更事件格式如下：
-```json
-{
-  "schema": {
-    "type": "struct",
-    "fields": [
-      {
-        "type": "struct",
-        "fields": [
-          {
-            "type": "int32",
-            "optional": false,
-            "field": "COL001"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "COL002"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "COL003"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "COL004"
-          }
-        ],
-        "optional": true,
-        "name": "my_topic11040003.CONNECT_USER.TEST001.Value",
-        "field": "before"
-      },
-      {
-        "type": "struct",
-        "fields": [
-          {
-            "type": "int32",
-            "optional": false,
-            "field": "COL001"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "COL002"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "COL003"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "COL004"
-          }
-        ],
-        "optional": true,
-        "name": "my_topic11040003.CONNECT_USER.TEST001.Value",
-        "field": "after"
-      },
-      {
-        "type": "struct",
-        "fields": [
-          {
-            "type": "string",
-            "optional": false,
-            "field": "version"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "connector"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "name"
-          },
-          {
-            "type": "int64",
-            "optional": false,
-            "field": "ts_ms"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "name": "io.debezium.data.Enum",
-            "version": 1,
-            "parameters": {
-              "allowed": "true,last,false,incremental"
+            {
+                "type": "string",
+                "optional": true,
+                "field": "COL002"
             },
-            "default": "false",
-            "field": "snapshot"
-          },
-          {
+            {
+                "type": "string",
+                "optional": false,
+                "field": "COL003"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "COL004"
+            }
+            ],
+            "optional": true,
+            "name": "my_topic11040003.CONNECT_USER.TEST001.Value",
+            "field": "before"
+        },
+        {
+            "type": "struct",
+            "fields": [
+            {
+                "type": "int32",
+                "optional": false,
+                "field": "COL001"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "COL002"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "COL003"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "COL004"
+            }
+            ],
+            "optional": true,
+            "name": "my_topic11040003.CONNECT_USER.TEST001.Value",
+            "field": "after"
+        },
+        {
+            "type": "struct",
+            "fields": [
+            {
+                "type": "string",
+                "optional": false,
+                "field": "version"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "connector"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "name"
+            },
+            {
+                "type": "int64",
+                "optional": false,
+                "field": "ts_ms"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "name": "io.debezium.data.Enum",
+                "version": 1,
+                "parameters": {
+                "allowed": "true,last,false,incremental"
+                },
+                "default": "false",
+                "field": "snapshot"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "db"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "sequence"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "schema"
+            },
+            {
+                "type": "string",
+                "optional": false,
+                "field": "table"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "txId"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "scn"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "commit_scn"
+            },
+            {
+                "type": "int32",
+                "optional": true,
+                "field": "batch_row_id"
+            },
+            {
+                "type": "int64",
+                "optional": true,
+                "field": "position_scn"
+            },
+            {
+                "type": "int64",
+                "optional": true,
+                "field": "group_lsn"
+            },
+            {
+                "type": "int32",
+                "optional": true,
+                "field": "group_offset"
+            },
+            {
+                "type": "bytes",
+                "optional": true,
+                "field": "instance_id"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "rs_id"
+            },
+            {
+                "type": "int64",
+                "optional": true,
+                "field": "ssn"
+            },
+            {
+                "type": "int32",
+                "optional": true,
+                "field": "redo_thread"
+            },
+            {
+                "type": "string",
+                "optional": true,
+                "field": "user_name"
+            }
+            ],
+            "optional": false,
+            "name": "io.debezium.connector.yashandb.Source",
+            "field": "source"
+        },
+        {
             "type": "string",
             "optional": false,
-            "field": "db"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "sequence"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "schema"
-          },
-          {
-            "type": "string",
-            "optional": false,
-            "field": "table"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "txId"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "scn"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "commit_scn"
-          },
-          {
-            "type": "int32",
-            "optional": true,
-            "field": "batch_row_id"
-          },
-          {
+            "field": "op"
+        },
+        {
             "type": "int64",
             "optional": true,
-            "field": "position_scn"
-          },
-          {
-            "type": "int64",
+            "field": "ts_ms"
+        },
+        {
+            "type": "struct",
+            "fields": [
+            {
+                "type": "string",
+                "optional": false,
+                "field": "id"
+            },
+            {
+                "type": "int64",
+                "optional": false,
+                "field": "total_order"
+            },
+            {
+                "type": "int64",
+                "optional": false,
+                "field": "data_collection_order"
+            }
+            ],
             "optional": true,
-            "field": "group_lsn"
-          },
-          {
-            "type": "int32",
-            "optional": true,
-            "field": "group_offset"
-          },
-          {
-            "type": "bytes",
-            "optional": true,
-            "field": "instance_id"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "rs_id"
-          },
-          {
-            "type": "int64",
-            "optional": true,
-            "field": "ssn"
-          },
-          {
-            "type": "int32",
-            "optional": true,
-            "field": "redo_thread"
-          },
-          {
-            "type": "string",
-            "optional": true,
-            "field": "user_name"
-          }
+            "name": "event.block",
+            "version": 1,
+            "field": "transaction"
+        }
         ],
         "optional": false,
-        "name": "io.debezium.connector.yashandb.Source",
-        "field": "source"
-      },
-      {
-        "type": "string",
-        "optional": false,
-        "field": "op"
-      },
-      {
-        "type": "int64",
-        "optional": true,
-        "field": "ts_ms"
-      },
-      {
-        "type": "struct",
-        "fields": [
-          {
-            "type": "string",
-            "optional": false,
-            "field": "id"
-          },
-          {
-            "type": "int64",
-            "optional": false,
-            "field": "total_order"
-          },
-          {
-            "type": "int64",
-            "optional": false,
-            "field": "data_collection_order"
-          }
-        ],
-        "optional": true,
-        "name": "event.block",
-        "version": 1,
-        "field": "transaction"
-      }
-    ],
-    "optional": false,
-    "name": "my_topic11040003.CONNECT_USER.TEST001.Envelope",
-    "version": 1
-  },
-  "payload": {
-    "before": null,
-    "after": {
-      "COL001": 100002,
-      "COL002": "xxxxxxxxxxxxxxxxxx002",
-      "COL003": "yyyyyyyyyyyyyyyyyyy002",
-      "COL004": null
+        "name": "my_topic11040003.CONNECT_USER.TEST001.Envelope",
+        "version": 1
     },
-    "source": {
-      "version": "2.4.2.4.3",
-      "connector": "yashandb",
-      "name": "my_topic11040003",
-      "ts_ms": 1762217944460,
-      "snapshot": "false",
-      "db": "",
-      "sequence": null,
-      "schema": "CONNECT_USER",
-      "table": "TEST001",
-      "txId": "390922265",
-      "scn": "755343132508905472",
-      "commit_scn": null,
-      "batch_row_id": 0,
-      "position_scn": 755343132508905472,
-      "group_lsn": 943349,
-      "group_offset": 240,
-      "instance_id": "AAAAAAAAAAA=",
-      "rs_id": null,
-      "ssn": 0,
-      "redo_thread": null,
-      "user_name": null
-    },
-    "op": "c",
-    "ts_ms": 1762246744808,
-    "transaction": null
-  }
-}
-```
+    "payload": {
+        "before": null,
+        "after": {
+        "COL001": 100002,
+        "COL002": "xxxxxxxxxxxxxxxxxx002",
+        "COL003": "yyyyyyyyyyyyyyyyyyy002",
+        "COL004": null
+        },
+        "source": {
+        "version": "2.4.2.4.3",
+        "connector": "yashandb",
+        "name": "my_topic11040003",
+        "ts_ms": 1762217944460,
+        "snapshot": "false",
+        "db": "",
+        "sequence": null,
+        "schema": "CONNECT_USER",
+        "table": "TEST001",
+        "txId": "390922265",
+        "scn": "755343132508905472",
+        "commit_scn": null,
+        "batch_row_id": 0,
+        "position_scn": 755343132508905472,
+        "group_lsn": 943349,
+        "group_offset": 240,
+        "instance_id": "AAAAAAAAAAA=",
+        "rs_id": null,
+        "ssn": 0,
+        "redo_thread": null,
+        "user_name": null
+        },
+        "op": "c",
+        "ts_ms": 1762246744808,
+        "transaction": null
+    }
+    }
+    ```
 上述两者JSON数据的schema结构是相同的，差异主要体现在payload部分，反映了不同的操作类型和上下文。从两种数据格式我们可知变更事件总体上划分为schema、payload两部分，下面针对这两部分分别进行说明。
 
 #### schema部分
-Debezium 消息的 schema 部分采用分层结构设计，将数据变更事件拆解为多个逻辑模块。其核心包含三个层次：
-* 数据层（通过 before 和 after 两个对称结构分别定义变更前/后的完整行数据）、
-* 元数据层（source 结构描述数据库来源、表名、时间戳、SCN 等追踪信息）
-* 操作控制层（op 字段标识操作类型，ts_ms 记录处理时间，transaction 管理事务边界）。
+
+Debezium消息的schema部分采用分层结构设计，将数据变更事件拆解为多个逻辑模块。其核心包含三个层次：
+
+* 数据层（通过before和after两个对称结构分别定义变更前/后的完整行数据）。
+
+* 元数据层（source结构描述数据库来源、表名、时间戳、SCN等追踪信息）。
+* 操作控制层（op字段标识操作类型，ts_ms记录处理时间，transaction管理事务边界）。
 
 这种模块化设计通过明确的字段职责划分（如 before/after 的可空性对应不同操作场景）和统一的类型定义，既保证了数据的一致性描述，又为消费端提供了按需读取的灵活性，实现了变更数据的自描述性传输。
 
@@ -950,6 +958,7 @@ Debezium 消息的 schema 部分采用分层结构设计，将数据变更事件
 
 
 #### payload部分
+
 payload 部分的功能是承载数据变更事件的具体内容。它是根据 schema 定义所填充的实际数据值，是动态的、与具体操作相关的。其结构直接映射 schema 的定义，包含了数据变更的核心信息：变更前后的数据镜像（before 和 after）、操作类型（op）、变更的源数据库元信息（source）以及时间戳等。payload 是消费者业务逻辑处理的直接对象，回答了"发生了什么变更"、"变更的内容是什么"以及"在何处何时发生"等关键问题。
 
 | 序号 | 关键词    | 功能作用                           | 值说明                                         |
@@ -973,25 +982,30 @@ key.converter.schemas.enable=false
 value.converter.schemas.enable=false
 ```
 * schemas.enable 设为 false 时，Kafka 消息的 key 和 value 将仅包含原始数据，不附带 schema 元信息（字段结构、类型等），即不包含 schema 部分仅保留 payload 部分事件数据，从而减少单条消息的数据量，降低传输和存储开销，提升迁移效率。
+
 * 上述实例中transaction项为null，是因为上述只捕获了数据的插入操作，如果需要事务操作，在begin...end进行事务操作时，begin操作会带上transaction项信息。
 * 适用场景：适用于数据源与目标端表结构固定、双方对字段含义和类型已达成共识的场景（无需依赖 schema 进行字段映射）。
 
 ### DDL事件格式说明
-除了表数据行的变更，Debezium 还能捕获并记录数据库表结构的变更（DDL），这对于保证数据定义的同步至关重要。Debezium 支持记录 Schema 元数据的历史变更信息，并将其存储在由配置项 schema.history.internal.kafka.topic 指定的 Kafka 主题中。其核心作用是追踪数据库表结构的全量变更历史，包括表的创建、修改等 DDL 操作。当 Debezium 连接器重启时，会通过读取这些历史记录重建表结构，确保能正确解析后续的数据变更事件。
+
+除了表数据行的变更，Debezium还能捕获并记录数据库表结构的变更（DDL），这对于保证数据定义的同步至关重要。Debezium支持记录Schema元数据的历史变更信息，并将其存储在由配置项schema.history.internal.kafka.topic指定的Kafka主题中。其核心作用是追踪数据库表结构的全量变更历史，包括表的创建、修改等DDL操作。当Debezium连接器重启时，会通过读取这些历史记录重建表结构，确保能正确解析后续的数据变更事件。
+
 这类 DDL事件数据采用分层结构设计，包含：
-* 元数据层：记录变更相关的上下文信息；
-* 位置信息层：精确定位变更在数据库日志中的位置；
+* 元数据层：记录变更相关的上下文信息。
+
+* 位置信息层：精确定位变更在数据库日志中的位置。
 * 结构变更层：详细描述表结构的具体修改内容。
 
 这种分层设计既保证了 Schema 变更的可追溯性，也确保了连接器重启后的数据一致性。
 
-
 在 Debezium source连接器任务的配置中，若设置了如下参数，则会启用 DDL 事件捕获功能，并将这些变更事件写入指定的 Kafka 主题（示例中为 schema-changes.inventory11040003）：
+
 ```json
 "schema.history.internal.kafka.topic" : "schema-changes.inventory11040003"
 ```
 
 如下以test001例表分两种情况进行展示说明：
+
 ```sql
 CREATE TABLE connect_user.test001 (
    COL001 NUMBER(6,0) PRIMARY KEY,
@@ -1000,212 +1014,218 @@ CREATE TABLE connect_user.test001 (
    COL004 VARCHAR2(100 BYTE)
 );
 ```
-（1）当迁移任务启动时，会把源库中已存在的connect_user.test001表元数据迁移到对应的Kafka topic中（schema-changes.inventory11040003），事件格式如下：
-```json
-{
-  "source" : {
-    "server" : "my_topic11040003"
-  },
-  "position" : {
-    "instance_id" : "AAAAAAAAAAA=",
-    "position_scn" : 755320504801107969,
-    "ystream_start_scn" : "0",
-    "group_lsn" : 0,
-    "batch_row_id" : 0,
-    "group_offset" : 0,
-    "snapshot_scn" : "755320504801107968",
-    "snapshot" : true,
-    "scn" : "755320504801107968",
-    "snapshot_completed" : false,
-    "ystream_server_create" : false
-  },
-  "ts_ms" : 1762241280384,
-  "databaseName" : "YASHANDB",
-  "schemaName" : "CONNECT_USER",
-  "ddl" : "CREATE TABLE \"CONNECT_USER\".\"TEST001\"\n(\"COL001\" NUMBER(6, 0),\n\"COL002\" VARCHAR(100),\n\"COL003\" VARCHAR(100) NOT NULL ENABLE,\n\"COL004\" VARCHAR(100),\nPRIMARY KEY (\"COL001\")\nUSING INDEX\nPCTFREE 8 INITRANS 2 MAXTRANS 255\nTABLESPACE \"USERS\" ENABLE\n) PCTFREE 8 INITRANS 2 MAXTRANS 255\nLOGGING\nTABLESPACE \"USERS\"\nSEGMENT CREATION DEFERRED\nORGANIZATION HEAP",
-  "tableChanges" : [ {
-    "type" : "CREATE",
-    "id" : "\"CONNECT_USER\".\"TEST001\"",
-    "table" : {
-      "defaultCharsetName" : null,
-      "primaryKeyColumnNames" : [ "COL001" ],
-      "columns" : [ {
-        "name" : "COL001",
-        "jdbcType" : 2,
-        "typeName" : "NUMBER",
-        "typeExpression" : "NUMBER",
-        "charsetName" : null,
-        "length" : 6,
-        "scale" : 0,
-        "position" : 1,
-        "optional" : false,
-        "autoIncremented" : false,
-        "generated" : false,
-        "comment" : null,
-        "hasDefaultValue" : false,
-        "enumValues" : [ ]
-      }, {
-        "name" : "COL002",
-        "jdbcType" : 12,
-        "typeName" : "VARCHAR",
-        "typeExpression" : "VARCHAR",
-        "charsetName" : null,
-        "length" : 100,
-        "position" : 2,
-        "optional" : true,
-        "autoIncremented" : false,
-        "generated" : false,
-        "comment" : null,
-        "hasDefaultValue" : true,
-        "enumValues" : [ ]
-      }, {
-        "name" : "COL003",
-        "jdbcType" : 12,
-        "typeName" : "VARCHAR",
-        "typeExpression" : "VARCHAR",
-        "charsetName" : null,
-        "length" : 100,
-        "position" : 3,
-        "optional" : false,
-        "autoIncremented" : false,
-        "generated" : false,
-        "comment" : null,
-        "hasDefaultValue" : false,
-        "enumValues" : [ ]
-      }, {
-        "name" : "COL004",
-        "jdbcType" : 12,
-        "typeName" : "VARCHAR",
-        "typeExpression" : "VARCHAR",
-        "charsetName" : null,
-        "length" : 100,
-        "position" : 4,
-        "optional" : true,
-        "autoIncremented" : false,
-        "generated" : false,
-        "comment" : null,
-        "hasDefaultValue" : true,
-        "enumValues" : [ ]
-      } ],
-      "attributes" : [ ]
-    },
-    "comment" : null
-  } ]
-}
-```
-（2）当任务启动完成之后，用户对源库表connect_user.test001元数据做变更（如ALTER TABLE）：
 
-```sql
-ALTER TABLE connect_user.test001 ADD (
-    COL005 VARCHAR2(100 BYTE)
-);
-```
-在Kafka 的topic生成的日志变更事件格式如下：
-```json
-{
-  "source" : {
-    "server" : "my_topic11040003"
-  },
-  "position" : {
-    "transaction_id" : null,
-    "instance_id" : "AAAAAAAAAAA=",
-    "position_scn" : 755373352680075264,
-    "ystream_start_scn" : "0",
-    "group_lsn" : 943455,
-    "batch_row_id" : 0,
-    "group_offset" : 1658,
-    "snapshot_scn" : "755320504801107968",
-    "ystream_server_create" : false
-  },
-  "ts_ms" : 1762254123528,
-  "databaseName" : "",
-  "schemaName" : "CONNECT_USER",
-  "ddl" : "ALTER TABLE connect_user.test001 ADD (\r\n    COL005 VARCHAR2(100 BYTE)\r\n)",
-  "tableChanges" : [ {
-    "type" : "ALTER",
-    "id" : "\"CONNECT_USER\".\"TEST001\"",
-    "previousId" : "\"CONNECT_USER\".\"TEST001\"",
-    "table" : {
-      "defaultCharsetName" : null,
-      "primaryKeyColumnNames" : [ "COL001" ],
-      "columns" : [ {
-        "name" : "COL001",
-        "jdbcType" : 2,
-        "typeName" : "NUMBER",
-        "typeExpression" : "NUMBER",
-        "charsetName" : null,
-        "length" : 6,
-        "scale" : 0,
-        "position" : 1,
-        "optional" : false,
-        "autoIncremented" : false,
-        "generated" : false,
-        "comment" : null,
-        "hasDefaultValue" : false,
-        "enumValues" : [ ]
-      }, {
-        "name" : "COL002",
-        "jdbcType" : 12,
-        "typeName" : "VARCHAR",
-        "typeExpression" : "VARCHAR",
-        "charsetName" : null,
-        "length" : 100,
-        "position" : 2,
-        "optional" : true,
-        "autoIncremented" : false,
-        "generated" : false,
-        "comment" : null,
-        "hasDefaultValue" : true,
-        "enumValues" : [ ]
-      }, {
-        "name" : "COL003",
-        "jdbcType" : 12,
-        "typeName" : "VARCHAR",
-        "typeExpression" : "VARCHAR",
-        "charsetName" : null,
-        "length" : 100,
-        "position" : 3,
-        "optional" : false,
-        "autoIncremented" : false,
-        "generated" : false,
-        "comment" : null,
-        "hasDefaultValue" : false,
-        "enumValues" : [ ]
-      }, {
-        "name" : "COL004",
-        "jdbcType" : 12,
-        "typeName" : "VARCHAR",
-        "typeExpression" : "VARCHAR",
-        "charsetName" : null,
-        "length" : 100,
-        "position" : 4,
-        "optional" : true,
-        "autoIncremented" : false,
-        "generated" : false,
-        "comment" : null,
-        "hasDefaultValue" : true,
-        "enumValues" : [ ]
-      }, {
-        "name" : "COL005",
-        "jdbcType" : 12,
-        "typeName" : "VARCHAR2",
-        "typeExpression" : "VARCHAR2",
-        "charsetName" : null,
-        "length" : 100,
-        "position" : 5,
-        "optional" : true,
-        "autoIncremented" : false,
-        "generated" : false,
-        "comment" : null,
-        "hasDefaultValue" : true,
-        "enumValues" : [ ]
-      } ],
-      "attributes" : [ ]
+- 当迁移任务启动时，会把源库中已存在的connect_user.test001表元数据迁移到对应的Kafka topic中（schema-changes.inventory11040003），事件格式如下：
+
+    ```json
+    {
+    "source" : {
+        "server" : "my_topic11040003"
     },
-    "comment" : null
-  } ]
-} 
-```
+    "position" : {
+        "instance_id" : "AAAAAAAAAAA=",
+        "position_scn" : 755320504801107969,
+        "ystream_start_scn" : "0",
+        "group_lsn" : 0,
+        "batch_row_id" : 0,
+        "group_offset" : 0,
+        "snapshot_scn" : "755320504801107968",
+        "snapshot" : true,
+        "scn" : "755320504801107968",
+        "snapshot_completed" : false,
+        "ystream_server_create" : false
+    },
+    "ts_ms" : 1762241280384,
+    "databaseName" : "YASHANDB",
+    "schemaName" : "CONNECT_USER",
+    "ddl" : "CREATE TABLE \"CONNECT_USER\".\"TEST001\"\n(\"COL001\" NUMBER(6, 0),\n\"COL002\" VARCHAR(100),\n\"COL003\" VARCHAR(100) NOT NULL ENABLE,\n\"COL004\" VARCHAR(100),\nPRIMARY KEY (\"COL001\")\nUSING INDEX\nPCTFREE 8 INITRANS 2 MAXTRANS 255\nTABLESPACE \"USERS\" ENABLE\n) PCTFREE 8 INITRANS 2 MAXTRANS 255\nLOGGING\nTABLESPACE \"USERS\"\nSEGMENT CREATION DEFERRED\nORGANIZATION HEAP",
+    "tableChanges" : [ {
+        "type" : "CREATE",
+        "id" : "\"CONNECT_USER\".\"TEST001\"",
+        "table" : {
+        "defaultCharsetName" : null,
+        "primaryKeyColumnNames" : [ "COL001" ],
+        "columns" : [ {
+            "name" : "COL001",
+            "jdbcType" : 2,
+            "typeName" : "NUMBER",
+            "typeExpression" : "NUMBER",
+            "charsetName" : null,
+            "length" : 6,
+            "scale" : 0,
+            "position" : 1,
+            "optional" : false,
+            "autoIncremented" : false,
+            "generated" : false,
+            "comment" : null,
+            "hasDefaultValue" : false,
+            "enumValues" : [ ]
+        }, {
+            "name" : "COL002",
+            "jdbcType" : 12,
+            "typeName" : "VARCHAR",
+            "typeExpression" : "VARCHAR",
+            "charsetName" : null,
+            "length" : 100,
+            "position" : 2,
+            "optional" : true,
+            "autoIncremented" : false,
+            "generated" : false,
+            "comment" : null,
+            "hasDefaultValue" : true,
+            "enumValues" : [ ]
+        }, {
+            "name" : "COL003",
+            "jdbcType" : 12,
+            "typeName" : "VARCHAR",
+            "typeExpression" : "VARCHAR",
+            "charsetName" : null,
+            "length" : 100,
+            "position" : 3,
+            "optional" : false,
+            "autoIncremented" : false,
+            "generated" : false,
+            "comment" : null,
+            "hasDefaultValue" : false,
+            "enumValues" : [ ]
+        }, {
+            "name" : "COL004",
+            "jdbcType" : 12,
+            "typeName" : "VARCHAR",
+            "typeExpression" : "VARCHAR",
+            "charsetName" : null,
+            "length" : 100,
+            "position" : 4,
+            "optional" : true,
+            "autoIncremented" : false,
+            "generated" : false,
+            "comment" : null,
+            "hasDefaultValue" : true,
+            "enumValues" : [ ]
+        } ],
+        "attributes" : [ ]
+        },
+        "comment" : null
+    } ]
+    }
+    ```
+
+- 当任务启动完成之后，用户对源库表connect_user.test001元数据做变更（如ALTER TABLE）：
+
+    ```sql
+    ALTER TABLE connect_user.test001 ADD (
+        COL005 VARCHAR2(100 BYTE)
+    );
+    ```
+    
+    在Kafka 的topic生成的日志变更事件格式如下：
+
+    ```json
+    {
+    "source" : {
+        "server" : "my_topic11040003"
+    },
+    "position" : {
+        "transaction_id" : null,
+        "instance_id" : "AAAAAAAAAAA=",
+        "position_scn" : 755373352680075264,
+        "ystream_start_scn" : "0",
+        "group_lsn" : 943455,
+        "batch_row_id" : 0,
+        "group_offset" : 1658,
+        "snapshot_scn" : "755320504801107968",
+        "ystream_server_create" : false
+    },
+    "ts_ms" : 1762254123528,
+    "databaseName" : "",
+    "schemaName" : "CONNECT_USER",
+    "ddl" : "ALTER TABLE connect_user.test001 ADD (\r\n    COL005 VARCHAR2(100 BYTE)\r\n)",
+    "tableChanges" : [ {
+        "type" : "ALTER",
+        "id" : "\"CONNECT_USER\".\"TEST001\"",
+        "previousId" : "\"CONNECT_USER\".\"TEST001\"",
+        "table" : {
+        "defaultCharsetName" : null,
+        "primaryKeyColumnNames" : [ "COL001" ],
+        "columns" : [ {
+            "name" : "COL001",
+            "jdbcType" : 2,
+            "typeName" : "NUMBER",
+            "typeExpression" : "NUMBER",
+            "charsetName" : null,
+            "length" : 6,
+            "scale" : 0,
+            "position" : 1,
+            "optional" : false,
+            "autoIncremented" : false,
+            "generated" : false,
+            "comment" : null,
+            "hasDefaultValue" : false,
+            "enumValues" : [ ]
+        }, {
+            "name" : "COL002",
+            "jdbcType" : 12,
+            "typeName" : "VARCHAR",
+            "typeExpression" : "VARCHAR",
+            "charsetName" : null,
+            "length" : 100,
+            "position" : 2,
+            "optional" : true,
+            "autoIncremented" : false,
+            "generated" : false,
+            "comment" : null,
+            "hasDefaultValue" : true,
+            "enumValues" : [ ]
+        }, {
+            "name" : "COL003",
+            "jdbcType" : 12,
+            "typeName" : "VARCHAR",
+            "typeExpression" : "VARCHAR",
+            "charsetName" : null,
+            "length" : 100,
+            "position" : 3,
+            "optional" : false,
+            "autoIncremented" : false,
+            "generated" : false,
+            "comment" : null,
+            "hasDefaultValue" : false,
+            "enumValues" : [ ]
+        }, {
+            "name" : "COL004",
+            "jdbcType" : 12,
+            "typeName" : "VARCHAR",
+            "typeExpression" : "VARCHAR",
+            "charsetName" : null,
+            "length" : 100,
+            "position" : 4,
+            "optional" : true,
+            "autoIncremented" : false,
+            "generated" : false,
+            "comment" : null,
+            "hasDefaultValue" : true,
+            "enumValues" : [ ]
+        }, {
+            "name" : "COL005",
+            "jdbcType" : 12,
+            "typeName" : "VARCHAR2",
+            "typeExpression" : "VARCHAR2",
+            "charsetName" : null,
+            "length" : 100,
+            "position" : 5,
+            "optional" : true,
+            "autoIncremented" : false,
+            "generated" : false,
+            "comment" : null,
+            "hasDefaultValue" : true,
+            "enumValues" : [ ]
+        } ],
+        "attributes" : [ ]
+        },
+        "comment" : null
+    } ]
+    } 
+    ```
+
 部分关键字描述如下：
 
 | 序号 | 关键词 | 功能作用             | 取值范围/说明 |
@@ -1240,11 +1260,11 @@ ALTER TABLE connect_user.test001 ADD (
 
 ## 常见问题
 
-#### Q1. 报错“YashanDB does not yet have the YStream server ‘serverxx’ or check option 'database.ystream.server.name' if the parameters are filled in correctly. Please create and configure the YStream server, refer to the link 'xxx'.”该如何处理？
+### Q1. 报错“YashanDB does not yet have the YStream server ‘serverxx’ or check option 'database.ystream.server.name' if the parameters are filled in correctly. Please create and configure the YStream server, refer to the link 'xxx'.”该如何处理？
 
 该报错表示`database.ystream.server.name`参数值对应的YStream服务不存在，请先调用DBMS_YSTREAM_ADM高级包对应函数创建YStream服务并完成相关配置。
 
-#### Q2. 报错：YashanDB YStream server status is xxx. Please execute 'DBMS\_YSTREAM\_ADM.START( server\_name IN VARCHAR(64) );' start YStream server。
+### Q2. 报错：YashanDB YStream server status is xxx. Please execute 'DBMS_YSTREAM_ADM.START( server_name IN VARCHAR(64) );' start YStream server。
 
 该报错表示`database.ystream.server.name`参数值对应的YStream服务处于非运行状态或者非启动状态，请先在数据库中调用DBMS_YSTREAM_ADM.START函数启动该YStream服务：
 
@@ -1252,18 +1272,18 @@ ALTER TABLE connect_user.test001 ADD (
 exec DBMS_YSTREAM_ADM.START('YStream服务名');
 ```
 
-#### Q3. Decimal数值同步到Kafka后，为什么序列化出来数据出错？
+### Q3. Decimal数值同步到Kafka后，为什么序列化出来数据出错？
 
 debezium会将负scale的Decimal进行特殊处理，建议使用参数`decimal.handling.mode`=string来规避。
 
-#### Q4. DATE\TIME\TIMESTAMP数值同步到Kafka后，为什么是时间戳的形式，而不是‘yyyy-MM-dd HH:mm:ss.SSSSSS’的形式？
+### Q4. DATE\TIME\TIMESTAMP数值同步到Kafka后，为什么是时间戳的形式，而不是‘yyyy-MM-dd HH:mm:ss.SSSSSS’的形式？
 
 debezium的默认处理方式是将时间类型映射到INT64，如果需要映射到固定格式数据，可参考上面的《数据定制化转换》。
 
-#### Q5. 为什么元数据快照阶段快照了同步范围之外的表，比如日志中打印”Capturing structure of table xx.xx“？
+### Q5. 为什么元数据快照阶段快照了同步范围之外的表，比如日志中打印”Capturing structure of table xx.xx“？
 
 debezium默认情况下会快照数据库中所有表的表结构，可以通过设置`schema.history.internal.store.only.captured.tables.ddl`为true，只快照同步范围内的表，具体解释可以查看连接器参数说明。
 
-#### Q6. 如何才能配置监听到`truncate table xx`事件呢？
+### Q6. 如何才能配置监听到`truncate table xx`事件呢？
 
 设置skipped.operations为none，具体解释可以查看连接器参数说明。

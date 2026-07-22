@@ -4,8 +4,9 @@ mydumper是一款针对MySQL数据库的高性能多线程备份工具，YashanD
 
 在进行对接操作前，您需要先准备好如下事项：
 
-1. 已安装mydumper v0.16.9-1
-2. 已存在一个可正常访问的YashanDB服务端，且服务端运行于mysql模式。
+- 已安装mydumper v0.16.9-1。
+
+- 已存在一个可正常访问的YashanDB服务端（mysql模式）。
 
 ## 对接配置
 
@@ -20,6 +21,7 @@ $ mydumper -u sales -p sales -h 192.168.1.2 -P 1690 -T sales.products,sales1.are
 ```
 
 - -u：YashanDB中已创建并拥有合适权限的用户名称
+
 - -p：YashanDB用户的密码
 - -h：YashanDB服务端IP（多实例形态如YAC，选择其中一个IP）
 - -T：要导出的表，必须为database.table的格式

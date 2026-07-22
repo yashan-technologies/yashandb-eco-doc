@@ -4,8 +4,9 @@ mysqldump是MySQL数据库管理系统内置的备份和迁移工具，YashanDB�
 
 在进行对接操作前，您需要先准备好如下事项：
 
-1. 已安装mysqldump 10.13
-2. 已存在一个可正常访问的YashanDB服务端，且服务端运行于mysql模式。
+- 已安装mysqldump 10.13。
+
+- 已存在一个可正常访问的YashanDB服务端（mysql模式）。
 
 ## 对接配置
 
@@ -24,6 +25,7 @@ mysqldump 连接选项 [options] --databases dbname [表选项] [options] > back
 运行mysqldump命令需要同时指定如下选项连接YashanDB：
 
 - -u：指定数据库用户名
+
 - -p：指定数据库用户密码，可直接在命令行显式输入参数（需注意信息安全），或者不输入参数采取交互式输入密码；请注意采取显式输入方式时，-p后应直接输入参数，不可有空格
 - -h：指定数据库的IP地址，使用本机地址时可省略此选项
 - -P：指定数据库的MySQL监听端口，默认安装的YashanDB产品对应MySQL监听端口为1690
@@ -105,6 +107,7 @@ $ mysqldump -h192.168.1.2 -P1690 -usales -p******** --set-gtid-purged=OFF --no-t
 在将mysqldump用于如下场景时不建议指定本选项：
 
 1. 大数据量导出，直接禁用上述选项而不进行任何优化，可能导致速度很慢。
+
 2. 需要保证数据一致性的情况。
 
 示例
@@ -122,6 +125,7 @@ $ mysqldump -h192.168.1.2 -P1690 -usales -p******** --skip-opt --no-tablespaces=
 指定为TRUE时，mysqldump将在单个事务中执行转储操作，确保获得一致的数据快照，具体动作如下：
 
 1. 在转储开始时启动一个新事务。
+
 2. 设置事务隔离级别为REPEATABLE READ。
 3. 获得数据的一致性快照。
 4. 在整个转储过程中保持该事务打开状态。

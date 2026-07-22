@@ -1,7 +1,8 @@
 Apache Flink是一款开源的分布式数据流处理引擎，适用于大规模数据处理，可简化大数据应用开发。YashanDB提供了两种和Flink工具的对接方式，如下：
 
-1. 通过载入YashanDB JDBC驱动以及YashanDB Flink Connector组件，可实现Flink连接YashanDB并读取/写入数据。
-2. 通过载入YashanDB JDBC驱动、YStream组件以及YashanDB CDC连接器，可实现Flink对YashanDB的变更数据捕获（CDC）。
+- 通过载入YashanDB JDBC驱动以及YashanDB Flink Connector组件，可实现Flink连接YashanDB并读取/写入数据。
+
+- 通过载入YashanDB JDBC驱动、YStream组件以及YashanDB CDC连接器，可实现Flink对YashanDB的变更数据捕获（CDC）。
 
 ## YashanDB读取/写入
 
@@ -9,23 +10,25 @@ Apache Flink是一款开源的分布式数据流处理引擎，适用于大规�
 
 在进行对接操作前，您需要先准备好如下事项：
 
-1. 已安装Jdk11及以上的Java应用环境
-2. 已安装Flink 1.15，或Flink 1.16~1.19
-3. 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包
-4. 已向我们的技术支持人员获取YashanDB Flink Connector组件包，其中1.1.0版本适配Flink 1.15，其他适配Flink 1.16~1.19
-5. 已存在一个可正常访问的YashanDB服务端。
+- 已安装Jdk11及以上的Java应用环境。
+
+- 已安装Flink 1.15，或Flink 1.16~1.19。
+- 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包。
+- 已向我们的技术支持人员获取YashanDB Flink Connector组件包，其中1.1.0版本适配Flink 1.15，其他适配Flink 1.16~1.19。
+- 已存在一个可正常访问的YashanDB服务端。
 
 ### 对接配置
 
 请参照如下步骤进行YashanDB与Flink的对接配置：
 
 1. 找到Flink软件的安装目录，在目录下找到lib文件夹。
+
 2. 将YashanDB JDBC驱动包和YashanDB Flink Connector组件包（均为jar包）放至lib文件夹中。
 3. 启动Flink集群：
 
-```bash
-$ ./bin/start_cluster.sh
-```
+    ```bash
+    $ ./bin/start_cluster.sh
+    ```
 
 ### 使用简介
 
@@ -33,34 +36,34 @@ $ ./bin/start_cluster.sh
 
 1. 进入Flink软件的安装目录，启动Flink SQL Client：
 
-```bash
-$ ./bin/sql_client.sh embedded
-```
+    ```bash
+    $ ./bin/sql_client.sh embedded
+    ```
 
 2. 创建源表连接器（请将your_host、your_port、your_dbname、your_name、your_password和your_table修改为实际值）：
 
-```sql
--- register an YashanDB table 'products' in Flink SQL
-Flink SQL> CREATE TABLE products (
-     ID INT NOT NULL,
-     NAME STRING,
-     DESCRIPTION STRING,
-     WEIGHT DECIMAL(10, 3),
-     PRIMARY KEY(id) NOT ENFORCED
-     ) WITH (
-     'connector' = 'yashandb',
-     'url' = 'jdbc:yasdb://your_host:your_port/your_dbname'
-     'username' = 'your_name',
-     'password' = 'your_password',
-     'schema-name' = 'sales',
-     'table-name' = 'products');
-```
+    ```sql
+    -- register an YashanDB table 'products' in Flink SQL
+    Flink SQL> CREATE TABLE products (
+        ID INT NOT NULL,
+        NAME STRING,
+        DESCRIPTION STRING,
+        WEIGHT DECIMAL(10, 3),
+        PRIMARY KEY(id) NOT ENFORCED
+        ) WITH (
+        'connector' = 'yashandb',
+        'url' = 'jdbc:yasdb://your_host:your_port/your_dbname'
+        'username' = 'your_name',
+        'password' = 'your_password',
+        'schema-name' = 'sales',
+        'table-name' = 'products');
+    ```
 
 3. 创建成功后即可在Flink SQL中查询YashanDB中products表：
 
-```sql
-Flink SQL> SELECT * FROM products;
-```
+    ```sql
+    Flink SQL> SELECT * FROM products;
+    ```
 
 #### 连接器参数
 
@@ -93,9 +96,9 @@ Flink SQL> SELECT * FROM products;
 
 - 在upsert模式下，连接器将根据主键判断插入新行或更新已存在的行，该模式可确保幂等性。建议为源表定义主键，并确保该主键为YashanDB中对应表的唯一键或主键。
 
-  > **Note**:
-  >
-  > 在存算一体分布式部署中，为保证对同一主键的同一操作只生成一条记录，需在Flink SQL中执行`SET 'table.exec.sink.upsert-materialize' = 'FORCE';`将table.exec.sink.upsert-materialize参数设置为FORCE。
+    > **Note**:
+    >
+    > 在存算一体分布式部署中，为保证对同一主键的同一操作只生成一条记录，需在Flink SQL中执行`SET 'table.exec.sink.upsert-materialize' = 'FORCE';`将table.exec.sink.upsert-materialize参数设置为FORCE。
 
 - 在append模式下，连接器会把所有记录解释为INSERT消息，如果违反了YashanDB中主键或者唯一约束，INSERT插入可能会失败。
 
@@ -155,6 +158,7 @@ YashanDB Flink Connector组件不对时间类型的时区进行处理，如遇�
 在执行对接前，请您先了解YashanDB CDC组件的使用限制：
 
 - 用于CDC的表上的数据类型不能为JSON，XMLTYPE，UDT，ST_GEOMETRY或BOX2D。
+
 - 用于CDC的表上含LOB数据类型时，该表必须存在主键，否则，在对该表进行update/delete变更捕获时，LOB数据会丢失。
 - 如使用Flink Stream API，每个任务的表数量不能超过1万。
 - Ystream服务最多为32个，因此Flink的任务最多同时只能运行32个。
@@ -163,27 +167,40 @@ YashanDB Flink Connector组件不对时间类型的时区进行处理，如遇�
 
 在进行对接操作前，您需要先准备好如下事项：
 
-1. 已安装Jdk11及以上的Java应用环境
-2. 已安装Flink 1.15，或Flink 1.16~1.19
-3. 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包和YStream组件包
-4. 已向我们的技术支持人员获取YashanDB CDC组件包，其中1.1.0版本适配Flink 1.15，其他适配Flink 1.16~1.19
-5. 已存在一个可正常访问的YashanDB服务端。
+- 已安装Jdk11及以上的Java应用环境。
+
+- 已安装Flink 1.15，或Flink 1.16~1.19。
+
+- 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包和YStream组件包。
+
+- 已向我们的技术支持人员获取YashanDB CDC组件包，其中1.1.x版本适配Flink 1.15，1.3.x版本适配Flink 1.13，其他适配Flink 1.16~1.19。
+
+- 已存在一个可正常访问的YashanDB服务端。
+
+- 如需使用YashanDB Flink CDC连接备库进行数据同步，需注意：
+   
+   - 开启附加日志、创建YStream服务以及为YStream服务添加监听表相关操作，均需在**主库**上执行。
+   
+   - 启动YStream服务，则需在**目标备库**上执行。
 
 ### 对接配置
 
 请参照如下步骤进行YashanDB与Flink的对接配置：
 
 1. 找到Flink软件的安装目录，在目录下找到lib文件夹。
+
 2. 将YashanDB JDBC驱动包、YStream组件包和YashanDB CDC组件包（均为jar包）放至lib文件夹中。
 3. 启动Flink集群：
 
-```bash
-$ ./bin/start_cluster.sh
-```
+    ```bash
+    $ ./bin/start_cluster.sh
+    ```
 
 ### 使用简介
 
 完成上述配置后，您还需要配置YashanDB服务端的YStream服务，以及创建连接器，来开始Flink对YashanDB的CDC。
+
+<span id="create_ystream" name="create_ystream"></span>
 
 #### 配置YashanDB YStream
 
@@ -191,37 +208,67 @@ $ ./bin/start_cluster.sh
 
 1. 配置Ystream内存池（请将streamPoolSize修改为实际值）：
 
-```sql
-ALTER SYSTEM SET STREAM_POOL_SIZE = streamPoolSize;
-```
-
+    ```sql
+    ALTER SYSTEM SET STREAM_POOL_SIZE = streamPoolSize;
+    ```
 
 2. 按需开启库级或表级附加日志（请将tablename修改为实际值）：
 
-```sql
---当您需要监听库下全部对象时（包含新增对象），可开全库附加日志
-ALTER DATABASE ADD SUPPLEMENTAL LOG TABLE TYPE (HEAP);
-ALTER DATABASE ADD SUPPLEMENTAL LOG DATA ( ALL) COLUMNS;
+    ```sql
+    --当您需要监听库下全部对象时（包含新增对象），可开全库附加日志
+    ALTER DATABASE ADD SUPPLEMENTAL LOG TABLE TYPE (HEAP);
+    ALTER DATABASE ADD SUPPLEMENTAL LOG DATA ( ALL) COLUMNS;
 
---当您仅需要监听某些表时，可开启表级附加日志
-ALTER TABLE tablename ADD SUPPLEMENTAL LOG DATA ( ALL ) COLUMNS;
-```
+    --当您仅需要监听某些表时，可开启表级附加日志
+    ALTER TABLE tablename ADD SUPPLEMENTAL LOG DATA ( ALL ) COLUMNS;
+    ```
 
-> **Caution**：
->
-> 不开启附加日志或开启附加日志的对象不正确会导致数据丢失甚至任务失败。
+    > **Caution**：
+    >
+    > 不开启附加日志或开启附加日志的对象不正确会导致数据丢失甚至任务失败。
 
 3. 为YStream服务的连接用户授权（请将connect_user修改为实际值）：
 
-```sql
-GRANT CREATE SESSION TO connect_user;
-GRANT SELECT ON V_$DATABASE TO connect_user;
-GRANT SELECT ON V_$TRANSACTION TO connect_user;
-GRANT SELECT ON V_$YSTREAM_SERVER TO connect_user;
-GRANT FLASHBACK ANY TABLE TO connect_user; 
-GRANT SELECT ANY TABLE TO connect_user;
-GRANT YSTREAM_CAPTURE TO connect_user;
-```
+    ```sql
+    GRANT CREATE SESSION TO connect_user;
+    GRANT SELECT ON SYS.V_$DATABASE TO connect_user;
+    GRANT SELECT ON SYS.V_$TRANSACTION TO connect_user;
+    GRANT SELECT ON SYS.V_$YSTREAM_SERVER TO connect_user;
+    GRANT FLASHBACK ANY TABLE TO connect_user; 
+    GRANT SELECT ANY TABLE TO connect_user;
+    GRANT YSTREAM_CAPTURE TO connect_user;
+    ```
+
+4. 调用DBMS_YSTREAM_ADM高级包的CREATE函数创建YStream服务（请将serverName、connect_user和start_scn修改为实际值）：
+
+    ```sql
+    --start_scn可通过查询select CURRENT_SCN from V$DATABASE获取
+    EXEC DBMS_YSTREAM_ADM.CREATE('serverName', 'connect_user', start_scn)
+    ```
+
+5. 调用DBMS_YSTREAM_ADM高级包的ADD_TABLES函数为YStream服务新增解析表名和模式（请将serverName、table和schema修改为实际值）：
+
+    ```sql
+    --可同时指定多个表或多个模式
+    EXEC DBMS_YSTREAM_ADM.ADD_TABLES('serverName', 'SCHEMA1.TABLE1,SCHEMA1.TABLE2', 'SCHEMA1,SCHEMA2');
+    --如果仅同步一张表，使用FLINK SQL API需使用此种方式
+    EXEC DBMS_YSTREAM_ADM.ADD_TABLES('serverName', 'SCHEMA1.TABLE1', null);
+    --如果仅同步SCHEMA
+    EXEC DBMS_YSTREAM_ADM.ADD_TABLES('serverName', null, 'SCHEMA1,SCHEMA2');
+    ```
+
+6. 调用DBMS_YSTREAM_ADM高级包的SET_PARAMETER函数为YStream服务设置相关参数，不执行此函数则使用默认值（请将serverName修改为实际值）：
+
+    ```sql
+    EXEC DBMS_YSTREAM_ADM.SET_PARAMETER('serverName', 'PARALLELISM', '3');
+    ```
+
+7. 调用DBMS_YSTREAM_ADM高级包的START函数启动YStream服务（请将serverName修改为实际值）：
+
+    ```sql
+    -- 如果使用备库连接，需在备库执行START
+    EXEC DBMS_YSTREAM_ADM.START('serverName');
+    ```
 
 #### 创建连接器
 
@@ -229,36 +276,36 @@ Flink SQL为Flink提供的SQL语法格式工具，该工具可以CLI方式供开
 
 1. 进入Flink软件的安装目录，启动Flink SQL Client：
 
-```bash
-$ ./bin/sql_client.sh embedded
-```
+    ```bash
+    $ ./bin/sql_client.sh embedded
+    ```
 
 2. 创建源表连接器（请将your_host、your_port、your_dbname、your_name、your_password和your_table修改为实际值）：
 
-```sql
--- register an YashanDB table 'products' in Flink SQL
-Flink SQL> CREATE TABLE products (
-     ID INT NOT NULL,
-     NAME STRING,
-     DESCRIPTION STRING,
-     WEIGHT DECIMAL(10, 3),
-     PRIMARY KEY(id) NOT ENFORCED
-     ) WITH (
-     'connector' = 'yashandb-cdc',
-     'hostname' = 'your_host'
-     'port' = 'your_port',
-     'username' = 'your_name',  --对应YStream中的connect_user
-     'password' = 'your_password',
-     'ystream.serverName'='ystream_server', 
-     'schema-name' = 'sales',
-     'table-name' = 'products');
-```
+    ```sql
+    -- register an YashanDB table 'products' in Flink SQL
+    Flink SQL> CREATE TABLE products (
+        ID INT NOT NULL,
+        NAME STRING,
+        DESCRIPTION STRING,
+        WEIGHT DECIMAL(10, 3),
+        PRIMARY KEY(id) NOT ENFORCED
+        ) WITH (
+        'connector' = 'yashandb-cdc',
+        'hostname' = 'your_host'
+        'port' = 'your_port',
+        'username' = 'your_name',  --对应YStream中的connect_user
+        'password' = 'your_password',
+        'ystream.serverName'='ystream_server', 
+        'schema-name' = 'sales',
+        'table-name' = 'products');
+    ```
 
 3. 创建成功后即可在Flink SQL中查询YashanDB中products表：
 
-```sql
-Flink SQL> SELECT * FROM products;
-```
+    ```sql
+    Flink SQL> SELECT * FROM products;
+    ```
 
 #### 连接器参数
 
@@ -381,21 +428,21 @@ YashanDB CDC组件内置了一套数据映射，用于YashanDB和Flink SQL之间
 | ROWID                  | STRING         |
 | UROWID                 | bytes          |
 
-#### 常见问题
+### 常见问题
 
-##### Q1. 为什么运行YashanDB CDC需要YStream依赖？
+#### Q1. 为什么运行YashanDB CDC需要YStream依赖？
 
 YashanDB CDC内部使用了YashanDB的YStream来捕获增量数据信息，YashanDB CDC组件包不包含YStream组件，需要用户自行或取YStream组件包放入Flink的lib目录下。
 
-##### Q2. YashanDB CDC报错“YashanDB YStream serverName 'server'  has existed in database,  Please enter a non-existent option 'ystream.serverName' in V\_$YSTREAM\_SERVER.”该怎么处理？
+#### Q2. YashanDB CDC报错“YashanDB YStream serverName 'server'  has existed in database,  Please enter a non-existent option 'ystream.serverName' in V_$YSTREAM_SERVER.”该怎么处理？
 
 - 首次启动YashanDB CDC，会根据用户填写的选项`ystream.serverName`自动创建YashanDB数据库的Ystream服务，如果数据库中已存在同名YStream服务会创建失败并报此错，需修改`ystream.serverName`值并确保全局唯一。
 
 - 非首次启动YashanDB CDC：
 
-  - 如果使用savepoint启动，YashanDB CDC会复用上次创建的YStream服务重新从上一个数据点位拉取任务，不涉及新建YStream服务，不会出现此报错。
+    - 如果使用savepoint启动，YashanDB CDC会复用上次创建的YStream服务重新从上一个数据点位拉取任务，不涉及新建YStream服务，不会出现此报错。
 
-  - 若用户重新开启新的YashanDB CDC任务，需重新配置新的唯一`ystream.serverName`值。
+    - 若用户重新开启新的YashanDB CDC任务，需重新配置新的唯一`ystream.serverName`值。
 
 为降低重名报错的复现率，可在确认YStream服务已无需再使用后自行删除（在YashanDB中执行），删除语句参考如下：
 
@@ -404,6 +451,79 @@ EXEC DBMS_YSTREAM_ADM.STOP('ystream_server');
 EXEC DBMS_YSTREAM_ADM.DROP('ystream_server');
 ```
 
-##### Q3. 运行YashanDB CDC报错“The number of YStream server in the database has reached 32, and YashanDB's YStream server supports a maximum of 32. Please manually execute 'EXEC DBMS\_YSTREAM\_ADM.DROP('ystream\_server')' to delete the YStream server in' select * from V\_$YSTREAM\_SERVER'”该如何处理？
+#### Q3. 运行YashanDB CDC报错“The number of YStream server in the database has reached 32, and YashanDB's YStream server supports a maximum of 32. Please manually execute 'EXEC DBMS_YSTREAM_ADM.DROP('ystream_server')' to delete the YStream server in' select * from V_$YSTREAM_SERVER'”该如何处理？
 
 该错误信息表示YashanDB数据库中的YStream服务数量已达最大值32个，可查看V_$YSTREAM_SERVER视图获取所有YStream服务信息，并结合实际需求手动清理未使用/无需再用的YStream服务。
+
+#### Q4. YStream Server使用完成后需要删除吗？
+
+是的，必须及时删除不再使用的YStream Server。
+
+YStream Server在运行过程中会持续解析数据库的归档日志（Redo Log），如果不及时删除不再使用的YStream Server，会导致数据库归档日志不断积累，占用大量磁盘空间，严重时可能导致数据库磁盘空间耗尽而无法正常工作。
+
+#### Q5. 一个YStream Server只能由一个Flink任务连接并使用吗？
+
+YStream Server不支持多任务共享，同一个YStream Server无法同时被多个Flink CDC任务使用。如果尝试用同一个serverName创建多个CDC任务，会导致任务失败或数据读取异常。
+
+**建议**：
+
+- 定期检查数据库中的YStream Server状态：`SELECT * FROM V_$YSTREAM_SERVER;`
+
+- 每个CDC任务使用独立的YStream Server名称
+- 任务停止或迁移后，及时删除不再使用的YStream Server
+
+#### Q6. 任务运行报错"The ystream server 'xxx' does not exist in the database. Please manually create the YStream server in the database first"，怎么处理？
+
+YashanDB Flink CDC依赖YashanDB的YStream服务，需要手动在数据库中创建YStream服务，具体操作请参考[配置YashanDB YStream](#create_ystream)。
+
+#### Q7. 任务运行报错”The ystream server 'cdc' status is 'RUNNING', but expected 'STARTED'. Please start the YStream server first using: EXEC DBMS_YSTREAM_ADM.START('cdc');“，怎么处理？
+
+此错误表明YStream Server的当前状态为 `RUNNING`，但连接器期望的状态为 `STARTED`。可能的原因及解决方法如下：
+
+**原因一：YStream Server被其他任务连接**
+
+当一个YStream Server已经被其他Flink任务连接并使用时，新的任务尝试连接同名的YStream Server可能会出现状态不一致的问题。
+
+**解决方法**：
+
+1. 检查是否有其他任务正在使用该YStream Server：
+
+    ```sql
+    -- 查看 YStream Server 当前连接状态
+    select * from SYS.V_$YSTREAM_SERVER;
+    ```
+
+2. 停止并重新启动YStream Server：
+
+    ```sql
+    -- 先停止 YStream Server
+    EXEC DBMS_YSTREAM_ADM.STOP('your_server_name');
+
+    -- 等待几秒钟，确保连接完全断开
+
+    -- 重新启动 YStream Server
+    EXEC DBMS_YSTREAM_ADM.START('your_server_name');
+    ```
+
+3. 确保每个CDC任务使用独立的YStream Server。
+
+**原因二：数据库版本状态显示差异**
+
+某些数据库版本可能存在状态检查逻辑与实际状态的差异。
+
+**解决方法**：
+
+1. 检查YStream Server状态：
+
+    ```sql
+    -- 查看 YStream Server 当前状态
+    SELECT SERVER_NAME, STATUS FROM V_$YSTREAM_SERVER;
+    ```
+
+2. 确认状态变为STARTED后再启动Flink任务。
+
+3. 如果问题仍然存在：
+
+    - 检查数据库版本：确认使用的YashanDB版本与连接器相关驱动版本兼容。
+
+    - 联系技术支持：如果以上方法都无法解决，可能是数据库版本与连接器版本的兼容性问题，请联系YashanDB技术支持。

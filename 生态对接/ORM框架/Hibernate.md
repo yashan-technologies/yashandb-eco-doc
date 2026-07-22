@@ -4,13 +4,14 @@ Hibernate是一个开源的对象映射关系（ORM）框架，适配Java程序�
 
 在进行对接操作前，您需要先准备好如下事项：
 
-1. 已安装Jdk8的Java应用环境
-2. 已安装Springboot 1.x
-3. 已安装Maven 3.8
-4. 已安装Hibernate-core-5.x
-5. 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包
-6. 已向我们的技术支持人员获取YashanDialect-for-hibernate5方言包
-7. 已存在一个可正常访问的YashanDB服务端。
+- 已安装Jdk8的Java应用环境。
+
+- 已安装Springboot 1.x。
+- 已安装Maven 3.8。
+- 已安装Hibernate-core-5.x。
+- 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包。
+- 已向我们的技术支持人员获取YashanDialect-for-hibernate5方言包。
+- 已存在一个可正常访问的YashanDB服务端。
 
 ## 对接配置
 
@@ -18,53 +19,53 @@ Hibernate是一个开源的对象映射关系（ORM）框架，适配Java程序�
 
 1. 检查Maven核心配置文件pom.xml中是否指定了如下依赖项，没有则加上：
 
-```xml
- <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    
-        <!-- spring jpa，里面包含了hibernate核心类  -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-    
-        <!-- lombok  -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-    
-    </dependencies>
-```
+    ```xml
+    <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <scope>test</scope>
+            </dependency>
+        
+            <!-- spring jpa，里面包含了hibernate核心类  -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-jpa</artifactId>
+            </dependency>
+        
+            <!-- lombok  -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+            </dependency>
+        
+        </dependencies>
+    ```
 
-2. 以IDEA编辑器为例，从IDEA的菜单中，选择【 File > Project Structure > Libraries】
-3. 点击【+】，并选择【Java】，从本地选择已准备的YashanDB JDBC驱动包完成库添加；如为多模块项目，只需要选择相应的模块执行本操作。
+2. 以IDEA编辑器为例，从IDEA的菜单中，选择【 File > Project Structure > Libraries】。
+3. 单击【+】，并选择【Java】，从本地选择已准备的YashanDB JDBC驱动包完成库添加；如为多模块项目，只需要选择相应的模块执行本操作。
 4. 用上述相同的方式添加YashanDialect-for-hibernate5方言包。
 5. 编辑application.properties文件进行参数配置（请将下例中的host_ip、port、username和password修改为实际值）：
 
-```properties
-spring.datasource.url=jdbc:yasdb://host_ip:port/yasdb
-spring.datasource.username=username
-spring.datasource.password=password
-spring.datasource.driver-class-name=com.yashandb.jdbc.Driver
+    ```properties
+    spring.datasource.url=jdbc:yasdb://host_ip:port/yasdb
+    spring.datasource.username=username
+    spring.datasource.password=password
+    spring.datasource.driver-class-name=com.yashandb.jdbc.Driver
 
-# 方言必须设置为崖山方言YasDialect
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.YasDialect
+    # 方言必须设置为崖山方言YasDialect
+    spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.YasDialect
 
-# 是否自动建表
-spring.jpa.properties.hibernate.hbm2ddl.auto=create
+    # 是否自动建表
+    spring.jpa.properties.hibernate.hbm2ddl.auto=create
 
-# 字段名和数据库中对象名的映射关系:驼峰转下划线
-spring.jpa.properties.hibernate.naming-strategy = org.hibernate.cfg.ImprovedNamingStrategy
-```
+    # 字段名和数据库中对象名的映射关系:驼峰转下划线
+    spring.jpa.properties.hibernate.naming-strategy = org.hibernate.cfg.ImprovedNamingStrategy
+    ```
 
 ## 简单使用示例
 
@@ -72,116 +73,116 @@ spring.jpa.properties.hibernate.naming-strategy = org.hibernate.cfg.ImprovedNami
 
 1. 在YashanDB中创建如下表对象：
 
-```sql
--- 建表语句
-CREATE TABLE user1 
-(
-	id INT PRIMARY KEY,
-	name VARCHAR(30) NULL
-);
--- 预置5条数据
-INSERT INTO USER1 (id, name) VALUES
-(1, 'Jone'),
-(2, 'Jack',),
-(3, 'Tom',),
-(4, 'Sandy'),
-(5, 'Billie');
-```
+    ```sql
+    -- 建表语句
+    CREATE TABLE user1 
+    (
+        id INT PRIMARY KEY,
+        name VARCHAR(30) NULL
+    );
+    -- 预置5条数据
+    INSERT INTO USER1 (id, name) VALUES
+    (1, 'Jone'),
+    (2, 'Jack',),
+    (3, 'Tom',),
+    (4, 'Sandy'),
+    (5, 'Billie');
+    ```
 
 2. 创建User实体类，并使其与YashanDB的user1表对应。
 
-```java
-import lombok.Data;
-import org.hibernate.annotations.ColumnDefault;
+    ```java
+    import lombok.Data;
+    import org.hibernate.annotations.ColumnDefault;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import java.time.LocalTime;
+    import javax.persistence.Column;
+    import javax.persistence.Entity;
+    import javax.persistence.GeneratedValue;
+    import javax.persistence.GenerationType;
+    import javax.persistence.Id;
+    import javax.persistence.SequenceGenerator;
+    import javax.persistence.Table;
+    import java.time.LocalTime;
 
-@Data
-@Entity
-@Table(name = "user1")
-public class User {
+    @Data
+    @Entity
+    @Table(name = "user1")
+    public class User {
 
-    @Id // hibernate要求实体类中必须定义一个id属性，否则会报错。该属性被作为业务表的自增主键列
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ID_GENERATOR")
-    @SequenceGenerator(name = "ID_GENERATOR", sequenceName = "user_sequence") //user_sequence为序列名，可自定义命名
-    @ColumnDefault("user_sequence.nextval") //序列名称需与@SequenceGenerator中的sequenceName一致
-    private int id;
-    
-    @Column(name = "name")
-    private String name;
-    
-    public User() {
+        @Id // hibernate要求实体类中必须定义一个id属性，否则会报错。该属性被作为业务表的自增主键列
+        @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ID_GENERATOR")
+        @SequenceGenerator(name = "ID_GENERATOR", sequenceName = "user_sequence") //user_sequence为序列名，可自定义命名
+        @ColumnDefault("user_sequence.nextval") //序列名称需与@SequenceGenerator中的sequenceName一致
+        private int id;
+        
+        @Column(name = "name")
+        private String name;
+        
+        public User() {
+        }
+
+        public User(String name) {
+            this.name = name;
+        }
+        
+        public User(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
     }
-
-    public User(String name) {
-        this.name = name;
-    }
-    
-    public User(int id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-}
-```
+    ```
 
 3. 实现Repository接口，可自由选择继承JpaRepository，或者继承CrudRepository。
 
-```java
-import com.example.pojo.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+    ```java
+    import com.example.pojo.User;
+    import org.springframework.data.jpa.repository.JpaRepository;
+    import org.springframework.stereotype.Repository;
 
-@Repository
-public interface UserRepository extends JpaRepository<User,Integer> {
-// 注意JpaRepository<User,Integer>这里传入的泛型类型，第一个是上面定义的Entity，第二个是Entity的主键的类型
-// JpaRepository中可以不实现任何接口，其默认接口已足够使用。
-}
-```
+    @Repository
+    public interface UserRepository extends JpaRepository<User,Integer> {
+    // 注意JpaRepository<User,Integer>这里传入的泛型类型，第一个是上面定义的Entity，第二个是Entity的主键的类型
+    // JpaRepository中可以不实现任何接口，其默认接口已足够使用。
+    }
+    ```
 
 4. 创建单元测试类。
 
-```java
-package com.example;
+    ```java
+    package com.example;
 
-import com.example.dao.UserRepository;
-import com.example.pojo.User;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+    import com.example.dao.UserRepository;
+    import com.example.pojo.User;
+    import org.junit.Before;
+    import org.junit.Test;
+    import org.junit.runner.RunWith;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.boot.test.context.SpringBootTest;
+    import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
+    import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+    import static org.junit.Assert.assertEquals;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class UserTest {
-    @Autowired
-    private UserRepository repository;
-    @Before
-    public void deleteAllUser(){
-        repository.deleteAll();
+    @RunWith(SpringRunner.class)
+    @SpringBootTest
+    public class UserTest {
+        @Autowired
+        private UserRepository repository;
+        @Before
+        public void deleteAllUser(){
+            repository.deleteAll();
+        }
+
+        @Test
+        public void testAddUser() {
+            User user = new User("sasa");
+            repository.save(user);
+            List<User> list = repository.findAll();
+            assertEquals(1, list.size());
+        }
     }
-
-    @Test
-    public void testAddUser() {
-        User user = new User("sasa");
-        repository.save(user);
-        List<User> list = repository.findAll();
-        assertEquals(1, list.size());
-    }
-}
-```
+    ```
 
 ## 常见问题
 
@@ -190,11 +191,12 @@ public class UserTest {
 在定义实体类的Id属性时，@SequenceGenerator和@ColumnDefault中均指定了序列器名称，但Hibernate存在如下机制：
 
 1. @SequenceGenerator中的sequenceName指定的序列名是驼峰格式时，Hibernate会将其转为下划线格式。
+
 2. @ColumnDefault注解的value是驼峰格式时，Hibernate不做处理。
 
 因此，如开发者使用驼峰格式命名一个序列器时，上述机制会导致两个注解使用了不一致的序列器名称。
 
-解决办法为，对序列器统一采用下划线风格命名；或者不指定@ColumnDefault和@SequenceGenerator，此时Hibernate使用默认序列hibernate_sequence进行Id自增，但同时需修改@GeneratedValue为如下value：
+解决办法：对序列器统一采用下划线风格命名；或者不指定@ColumnDefault和@SequenceGenerator，此时Hibernate使用默认序列hibernate_sequence进行Id自增，但同时需修改@GeneratedValue为如下value：
 
 ```java
 @GeneratedValue(strategy= GenerationType.AUTO)
@@ -218,7 +220,7 @@ spring.jpa.properties.hibernate.hbm2ddl.auto=validate
 
 通常不同品牌的数据库在数据类型定义上存在差异，例如MySQL中存在TEXT数据类型而YashanDB无此类型。因此，当复制了其他数据库类型定义到YashanDB的映射中时，可能会因为YashanDB中不存在该数据类型而报错。
 
-解决办法为，在YashanDB中找一个虽定义不同但规格相近的数据类型进行替代。
+解决办法：在YashanDB中找一个虽定义不同但规格相近的数据类型进行替代。
 
 例如，对于MySQL中的TEXT类型，YashanDB中存在CLOB类型同样可用于保存大量字符数据，因此可使用CLOB类型代替MySQL中的TEXT数据类型，如下：
 

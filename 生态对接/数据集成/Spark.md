@@ -1,7 +1,8 @@
 Apache Spark是一款开源的分布式计算引擎，适用于大规模数据处理。YashanDB提供了两种和Spark工具的对接方式，如下：
 
-1. 通过载入YashanDB JDBC驱动，可实现Spark连接YashanDB并读取数据。
-2. 通过载入YashanDB JDBC驱动以及YashanDB Spark Connector组件，可实现Spark连接YashanDB并读取/写入数据。
+- 通过载入YashanDB JDBC驱动，可实现Spark连接YashanDB并读取数据。
+
+- 通过载入YashanDB JDBC驱动以及YashanDB Spark Connector组件，可实现Spark连接YashanDB并读取/写入数据。
 
 ## Spark读取YashanDB数据的对接
 
@@ -11,13 +12,14 @@ Apache Spark是一款开源的分布式计算引擎，适用于大规模数据�
 
 在进行对接操作前，您需要先准备好如下事项（以下版本不做严格要求，可按照需要灵活选择）：
 
-1. 已安装Jdk11的Java应用环境
-2. 已安装Scala 2.12
-3. 已安装SparkSql 3.0.2
-4. 已安装Maven 3.8
-5. 如您的应用所在操作系统为Windows，则需从[Github开源仓](https://github.com/cdarlint/winutils)下载winutils 3.0.2
-6. 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包
-7. 已存在一个可正常访问的YashanDB服务端。
+- 已安装Jdk11的Java应用环境。
+
+- 已安装Scala 2.12。
+- 已安装SparkSql 3.0.2。
+- 已安装Maven 3.8。
+- 如您的应用所在操作系统为Windows，则需从[Github开源仓](https://github.com/cdarlint/winutils)下载winutils 3.0.2。
+- 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包。
+- 已存在一个可正常访问的YashanDB服务端。
 
 ### 对接配置
 
@@ -25,19 +27,20 @@ Apache Spark是一款开源的分布式计算引擎，适用于大规模数据�
 
 1. 检查Maven核心配置文件pom.xml中是否指定了如下依赖项，没有则加上：
 
-```xml
- <dependencies>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_2.12</artifactId>
-            <version>3.0.2</version>
-            <scope>provided</scope>
-        </dependency>
-   </dependencies>
-```
+    ```xml
+    <dependencies>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-sql_2.12</artifactId>
+                <version>3.0.2</version>
+                <scope>provided</scope>
+            </dependency>
+      </dependencies>
+    ```
 
-2. 以IDEA编辑器为例，从IDEA的菜单中，选择【 File > Project Structure > Libraries】
-3. 点击【+】，并选择【Java】，从本地选择已准备的YashanDB JDBC驱动包完成库添加；如为多模块项目，只需要选择相应的模块执行本操作。
+2. 以IDEA编辑器为例，从IDEA的菜单中，选择【 File > Project Structure > Libraries】。
+
+3. 单击【+】，并选择【Java】，从本地选择已准备的YashanDB JDBC驱动包完成库添加；如为多模块项目，只需要选择相应的模块执行本操作。
 
 ### 简单使用示例
 
@@ -84,18 +87,20 @@ object SparkTest {
 
 在进行对接操作前，您需要先准备好如下事项：
 
-1. 已安装Java 1.8应用环境
-2. 已安装Scala 2.11或2.12
-3. 已安装Spark 3.2~3.5
-4. 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包
-5. 已向我们的技术支持人员获取YashanDB Spark Connector组件包
-6. 已存在一个可正常访问的YashanDB服务端。
+- 已安装Java 1.8应用环境。
+
+- 已安装Scala 2.11或2.12。
+- 已安装Spark 3.2~3.5。
+- 已在[YashanDB官网下载中心](https://download.yashandb.com/download)下载YashanDB JDBC驱动包。
+- 已向我们的技术支持人员获取YashanDB Spark Connector组件包。
+- 已存在一个可正常访问的YashanDB服务端。
 
 ### 对接配置
 
 请参照如下步骤进行YashanDB与Spark的对接配置：
 
 1. 找到Spark软件所在安装目录下的jars目录，将YashanDB JDBC驱动包和YashanDB Spark Connector组件包（均为.jar文件）放至该目录下。
+
 2. 重启Spark。
 
 ### 简单使用示例

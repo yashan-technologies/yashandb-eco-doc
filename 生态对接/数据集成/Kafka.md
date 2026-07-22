@@ -6,19 +6,19 @@ Apache Kafka是一款开源的分布式流处理平台，主要应用于大数�
 
 在进行对接操作前，您需要先准备好如下事项（以下版本不做严格要求，可按照需要灵活选择）：
 
-1. 已下载Kafka安装包，例如：
+- 已下载Kafka安装包，例如：
 
    ```shell
    wget https://archive.apache.org/dist/kafka/3.2.0/kafka_2.13-3.2.0.tgz
    ```
 
-2. 已下载Kafka-Connect-Jdbc安装包，例如：
+- 已下载Kafka-Connect-Jdbc安装包，例如：
 
    ```shell
    wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-jdbc/versions/10.5.1/confluentinc-kafka-connect-jdbc-10.5.1.zip
    ```
 
-3. 已存在一个可正常访问的YashanDB服务端。
+- 已存在一个可正常访问的YashanDB服务端。
 
 ## 对接配置
 
