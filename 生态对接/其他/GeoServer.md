@@ -29,7 +29,7 @@ YashanDB提供了gt-jdbc-yashandb方言包用于实现与GeoServer的对接，�
 1. 运行exec程序安装并启动GeoServer。
 2. 进入GeoServer软件的安装目录。
 
-2. 将YashanDB JDBC驱动包和gt-jdbc-yashandb方言包复制到安装目录的lib目录下。
+2. 将YashanDB JDBC驱动包和gt-jdbc-yashandb方言包复制到安装目录的webapps\geoserver\WEB-INF\lib目录下。
 
 3. 重启GeoServer。
 
