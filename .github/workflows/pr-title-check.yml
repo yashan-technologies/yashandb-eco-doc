@@ -1,0 +1,25 @@
+name: Check PR title
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  check-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const titlePattern = /^\s*(feat|fix|refactor|docs)<#\d+>:\s+\S.*$/;
+
+            if (!titlePattern.test(title)) {
+              core.setFailed(
+                'PR title must match type<#issue>: description, for example feat<#123>: add export support. Allowed types: feat, fix, refactor, docs.'
+              );
+            }

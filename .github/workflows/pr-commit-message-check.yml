@@ -1,0 +1,74 @@
+name: Check PR commit messages
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  check-commit-messages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate commit messages
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const allowedPrefix = /^(fix|feat|docs|test|refactor):/;
+            const query = `
+              query($owner: String!, $repo: String!, $number: Int!, $cursor: String) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $number) {
+                    commits(first: 100, after: $cursor) {
+                      nodes {
+                        commit {
+                          oid
+                          message
+                          messageHeadline
+                        }
+                      }
+                      pageInfo {
+                        hasNextPage
+                        endCursor
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const commits = [];
+            let cursor = null;
+
+            do {
+              const result = await github.graphql(query, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                number: context.issue.number,
+                cursor,
+              });
+              const page = result.repository.pullRequest.commits;
+              commits.push(...page.nodes.map(({ commit }) => commit));
+              cursor = page.pageInfo.hasNextPage
+                ? page.pageInfo.endCursor
+                : null;
+            } while (cursor);
+
+            const invalidCommits = commits.filter(
+              ({ message }) => !allowedPrefix.test(message)
+            );
+
+            if (invalidCommits.length > 0) {
+              const details = invalidCommits
+                .map(
+                  ({ oid, messageHeadline }) =>
+                    `- ${oid.slice(0, 7)} ${messageHeadline}`
+                )
+                .join('\n');
+
+              core.setFailed(
+                'Commit messages must start with fix:, feat:, docs:, test:, or refactor:.\n' +
+                  details
+              );
+            }

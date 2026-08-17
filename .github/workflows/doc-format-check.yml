@@ -1,0 +1,33 @@
+name: Check document format
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  check-doc-format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout documentation repository
+        uses: actions/checkout@v4
+        with:
+          path: yashandb-eco-doc
+          fetch-depth: 1
+
+      - name: Checkout opendoccheck
+        uses: actions/checkout@v4
+        with:
+          repository: yashan-technologies/opendoccheck
+          path: opendoccheck
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check document format
+        run: python opendoccheck/main.py check yashandb-eco-doc
