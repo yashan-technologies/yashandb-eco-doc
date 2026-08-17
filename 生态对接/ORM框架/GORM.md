@@ -26,7 +26,7 @@ GORM 是一款开源的 Go 语言 ORM 框架，yashandb-gorm（亦称 gorm-yasdb
 
 > 当前 GitHub 仓库（`yashan-technologies/yashandb-gorm`）已发布的最新版本为 **v1.0.2**，请使用 Git Tag 对应的版本号引入依赖，勿使用未发布的版本号。
 
-yashandb-gorm 依赖 `gorm.io/gorm v1.31.1` 与 `yashandb-go v1.4.3`；其中 Go 驱动最低兼容 YashanDB C 驱动版本为 **v23.4.1.100**，建议使用 YashanDB **23.4.x** 系列数据库服务端。
+yashandb-gorm 依赖 `gorm.io/gorm v1.31.1` 与 `yashandb-go v1.4.3`；其中 Go 驱动最低兼容 YashanDB C 驱动版本为 **v23.4.1.100**，建议使用 YashanDB 23.4.x 系列数据库服务端。
 
 ## 对接配置
 
@@ -61,7 +61,7 @@ yashandb-gorm 依赖 `gorm.io/gorm v1.31.1` 与 `yashandb-go v1.4.3`；其中 Go
 
 3. 配置数据库连接。yashandb-gorm 采用 DSN 格式连接 YashanDB，格式为：
 
-    ```
+    ```text
     username/password@host:port
     ```
 
@@ -218,7 +218,7 @@ yashandb-gorm 支持 `db.AutoMigrate(&YourModel{})` 自动建表/补列；生产
 
 ### 自增主键的使用问题
 
-一般情况下，YashanDB 里自增主键通过 **Sequence（序列）** 实现。若需在 **user1** 表上使用自增主键，须先在库中创建序列并绑定到 `id` 列：
+一般情况下，YashanDB 里自增主键通过 Sequence（序列）实现。若需在 **user1** 表上使用自增主键，须先在库中创建序列并绑定到 `id` 列：
 
 ```sql
 CREATE SEQUENCE sequence__USER1_ START WITH 10 INCREMENT BY 1;
@@ -243,7 +243,7 @@ yashandb-gorm 提供两种命名模式，通过连接配置项 `NamingCaseSensit
 
 #### 默认模式（推荐）
 
-使用 `yasdb.Open(dsn)` 连接时，`NamingCaseSensitive` 为 `false`（默认值）。在此模式下，yashandb-gorm 内置命名策略**默认**会将表名和列名统一转换为**大写**。例如结构体 `User` 通过 `TableName()` 映射为 `USER1` 表，字段 `Name` 映射为 `NAME` 列。
+使用 `yasdb.Open(dsn)` 连接时，`NamingCaseSensitive` 为 `false`（默认值）。在此模式下，yashandb-gorm 内置命名策略默认会将表名和列名统一转换为大写。例如结构体 `User` 通过 `TableName()` 映射为 `USER1` 表，字段 `Name` 映射为 `NAME` 列。
 
 在编写 `Where` 等查询条件时，建议使用结构体字段名或小写形式，GORM 会自动完成映射：
 
