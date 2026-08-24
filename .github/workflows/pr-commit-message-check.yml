@@ -15,7 +15,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const allowedPrefix = /^(fix|feat|docs|test|refactor):/;
+            const commitPattern = /^\s*(fix|feat|docs|test|refactor)<#\d+>:\s+\S.*$/;
             const query = `
               query($owner: String!, $repo: String!, $number: Int!, $cursor: String) {
                 repository(owner: $owner, name: $repo) {
@@ -24,7 +24,6 @@ jobs:
                       nodes {
                         commit {
                           oid
-                          message
                           messageHeadline
                         }
                       }
@@ -56,7 +55,7 @@ jobs:
             } while (cursor);
 
             const invalidCommits = commits.filter(
-              ({ message }) => !allowedPrefix.test(message)
+              ({ messageHeadline }) => !commitPattern.test(messageHeadline)
             );
 
             if (invalidCommits.length > 0) {
@@ -68,7 +67,7 @@ jobs:
                 .join('\n');
 
               core.setFailed(
-                'Commit messages must start with fix:, feat:, docs:, test:, or refactor:.\n' +
+                'Commit messages must match type<#issue>: description, using fix, feat, docs, test, or refactor and an issue number such as <#123>.\n' +
                   details
               );
             }
