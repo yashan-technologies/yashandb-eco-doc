@@ -18,7 +18,8 @@
 | 使用图形化或命令行 SQL 工具 | [SQL 工具](生态对接/00生态对接.md#sql-tools) | 根据工具选择 YashanDB JDBC 驱动或 MySQL 协议，并确认服务端模式和端口 |
 | 开发 Java 应用或 ORM 项目 | [Java ORM 文档](生态对接/00生态对接.md#orm-frameworks) | 准备 YashanDB JDBC 驱动；使用 Hibernate 时还需要对应方言 |
 | 开发 Python 应用或 ORM 项目 | [Python ORM 文档](生态对接/00生态对接.md#orm-frameworks) | 准备 YashanDB Python 驱动和对应 ORM 方言 |
-| 开发 .NET 应用或 ORM 项目 | [Entity Framework 6](生态对接/ORM框架/EntityFramework6.md)、[SqlSugar](生态对接/ORM框架/SqlSugar.md) | 根据组件要求准备 ADO.NET、ODBC 驱动或适配包 |
+| 开发 .NET 应用或 ORM 项目 | [Entity Framework 6](生态对接/ORM框架/EntityFramework6.md)、[Entity Framework Core 6](生态对接/ORM框架/EntityFrameworkCore6.md)、[SqlSugar](生态对接/ORM框架/SqlSugar.md) | 根据组件要求准备 ADO.NET、ODBC 驱动或适配包 |
+| 开发 Go 应用或 ORM 项目 | [GORM](生态对接/ORM框架/GORM.md) | 准备 YashanDB Go 驱动和 GORM 方言包 |
 | 批量导入导出、流式处理或 CDC | [数据集成文档](生态对接/00生态对接.md#data-integration) | 重点确认 Connector、YStream、Kafka、Flink 或 Spark 的版本兼容关系 |
 | 发布地理空间数据 | [GeoServer](生态对接/其他/GeoServer.md) | 准备 YashanDB JDBC 驱动和匹配的 GeoServer 方言包 |
 
@@ -39,6 +40,8 @@
 | --- | --- | --- |
 | Django | Python 驱动和 Django 方言 | [查看文档](生态对接/ORM框架/Django.md) |
 | Entity Framework 6 | ADO.NET 驱动和 EF6 适配 | [查看文档](生态对接/ORM框架/EntityFramework6.md) |
+| Entity Framework Core 6 | ADO.NET 驱动和 EF Core 6 适配 | [查看文档](生态对接/ORM框架/EntityFrameworkCore6.md) |
+| GORM | Go 驱动和 GORM 方言 | [查看文档](生态对接/ORM框架/GORM.md) |
 | Hibernate | JDBC 驱动和 Hibernate 方言 | [查看文档](生态对接/ORM框架/Hibernate.md) |
 | MyBatis | YashanDB JDBC 驱动 | [查看文档](生态对接/ORM框架/MyBatis.md) |
 | MyBatis-Plus | YashanDB JDBC 驱动 | [查看文档](生态对接/ORM框架/MyBatis-Plus.md) |
