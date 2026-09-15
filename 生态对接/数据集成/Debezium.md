@@ -185,6 +185,61 @@ curl -i -X POST -H "Accept:application/json" -H "Content-Type:application/json" 
 curl -s -X GET http://localhost:8083/connectors/yashandb-connector/status
 ```
 
+### 更改连接器配置并重启任务
+
+当需要修改YStream参数或其他Debezium连接器参数时，可以通过Kafka Connect REST API更新连接器配置并重启任务。以下示例将开启YStream容错，并设置YStream客户端扩展参数。请将`localhost:8083`和`yashandb-connector`替换为实际的Kafka Connect地址和连接器名称。
+
+1. （可选）查看当前连接器配置，确认连接器名称和现有配置：
+
+    ```bash
+    curl -s -X GET http://localhost:8083/connectors/yashandb-connector/config
+    ```
+
+2. 使用`PUT`接口更新配置。请求体必须是完整的连接器配置对象；未在请求体中保留的配置项可能会被删除或恢复为默认值，因此建议先保存上一步获取的配置，再在其基础上修改：
+
+    ```bash
+    curl -i -X PUT \
+      -H "Accept:application/json" \
+      -H "Content-Type:application/json" \
+      http://localhost:8083/connectors/yashandb-connector/config \
+      -d '{
+        "connector.class": "io.debezium.connector.yashandb.YashanDBConnector",
+        "database.hostname": "your_host",
+        "database.port": "your_port",
+        "database.user": "your_name",
+        "database.password": "your_password",
+        "database.dbname": "your_dbname",
+        "database.url": "jdbc:yasdb://your_host:your_port/your_dbname",
+        "topic.prefix": "my_topic",
+        "table.include.list": "your_schema.your_table",
+        "database.ystream.server.name": "serverName",
+        "ystream.fault.tolerance": "true",
+        "lob.enabled": "true",
+        "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
+        "schema.history.internal.kafka.topic": "schema-changes.inventory"
+      }'
+    ```
+
+    `PUT`成功后，Kafka Connect通常会自动对连接器进行重新配置并重启任务。YStream参数会在任务下一次建立YStream客户端连接时生效。
+
+3. 如需显式重启连接器及其任务，可调用重启接口：
+
+    ```bash
+    curl -i -X POST \
+      "http://localhost:8083/connectors/yashandb-connector/restart?includeTasks=true&onlyFailed=false"
+    ```
+
+    `includeTasks=true`表示同时重启Connector和Task；`onlyFailed=false`表示无论任务当前是否处于失败状态都执行重启。
+
+4. 查询连接器和Task状态，确认配置已生效且任务正常运行：
+
+    ```bash
+    curl -s -X GET http://localhost:8083/connectors/yashandb-connector/status
+    curl -s -X GET http://localhost:8083/connectors/yashandb-connector/config
+    ```
+
+    当返回的`connector.state`和`tasks[].state`为`RUNNING`时，表示连接器和任务已正常启动。若任务仍为`FAILED`，请查看返回的`trace`字段以及Kafka Connect worker日志。
+
 
 ### 连接器参数
 
@@ -204,6 +259,8 @@ curl -s -X GET http://localhost:8083/connectors/yashandb-connector/status
 | ystream.blocking.queue.size     | 128                                            | YStream客户端内置阻塞队列的长度，获取增量逻辑日志时直接从该队列获取          |
 | ystream.poll.timeout            | 10                                             | 从阻塞队列中获取下一个结果的超时时间（单位：秒） |
 | ystream.client.response.timeout | 60                                             | YStream服务端等待YStream客户端响应的最长时间（单位：秒）         |
+| ystream.fault.tolerance         | false                                          | 是否启用YStream客户端容错处理。设置为`true`后，连接器将调用YStream API的`setFaultTolerance(true)`启用容错；默认关闭。 |
+| ystream.additional.properties   | (none)                                         | YStream扩展参数列表，使用逗号分隔的`参数名=参数值`形式配置。参数名会自动映射到YStream Builder对应的setter，便于在YStream API新增参数后直接透传，无需升级连接器代码。显式连接器参数（如`ystream.fault.tolerance`、`ystream.poll.timeout`）优先级高于同名扩展参数。 |
 | topic.prefix                    | (none)                                     | 主题前缀，用于为连接器从中捕获更改的Oracle数据库服务器提供命名空间。该参数值将用作连接器发出的所有Kafka主题名称的前缀，要求全局唯一，由字母、数字、连字符、点和下划线组成。<br/>连接器无法恢复其数据库架构的历史主题，一旦更改该值并重新启动，连接器将会向新主题发出后续事件，**请不要轻易更改该参数值**   |
 | snapshot.mode                   | initial                                        | 连接器对捕获的表进行快照的模式<br/>* always：连接器每次启动时始终执行快照（表结构和数据），快照完成后连接器开始捕获并记录目标表发生的表结构和数据更改<br/>* initial：连接器首次启动时执行快照（表结构和数据），快照完成后连接器开始捕获并记录目标表发生的表结构和数据更改，后续启动时不会再次执行快照<br/>* initial_only：连接器首次启动时执行快照（表结构和数据），在目标表发生连接器启动后的首次更改时中止快照，且连接器不处理目标表发生的任何后续更改<br/>* schema_only：连接器每次启动时始终执行快照（仅含表结构），快照完成后连接器开始捕获并记录目标表发生的表结构更改<br/>* schema_only_recovery：基于schema_only模式的恢复模式，可用于连接器意外断连后再次重启时，连接器启动后会执行快照恢复损坏或丢失的历史主题，照完成后，连接器的表现同schema_only模式。**仅在连接器上一次意外断连时间点至快照时间点期间未发生表结构更改的情况下，才能安全使用此模式**。您也可以按需定期设置该值清理因意外断连而增长的历史主题<br/>更多详情请查阅[debezium官方文档](https://debezium.io/documentation/reference/2.4/connectors/oracle.html)  |
 | schema.include.list             | (none)                                     | 需捕获变更的schema清单，可选参数，清单采用正则表达式，多个schema名称间用逗号`,`分隔，若配置该参数，连接器将只捕获清单中包含的schema相关变更 <br/>通常该参数与schema.exclude.list参数择一配置即可，且schema.include.list优先级更高（即配置了schema.include.list后schema.exclude.list将失效），若二者均不配置，则默认捕获所有非系统schema的更改|
@@ -232,6 +289,21 @@ curl -s -X GET http://localhost:8083/connectors/yashandb-connector/status
 | <converter_name>.type | No default | 配置Debezium的自定义转换器的类名 |
 | <converter_name>.<param_name> | No default | 自定义转换器的配置，配置信息根据转换器的使用方式来设置 |
 | ddl.parse.fail.retry.read.table  | false                                          | 增量DDL解析失败后，处理DML事件时全量读取源表结构分析。schema.history.internal.skip.unparseable.ddl与ddl.parse.fail.retry.read.table均设置为true生效。|
+
+#### YStream扩展参数配置
+
+`ystream.additional.properties`用于透传当前版本连接器尚未提供专用配置项的YStream Builder参数。参数名支持点号、连字符或下划线分隔，连接器会将其转换为对应的`setXxx`方法；参数值支持字符串、整数、长整数、浮点数、布尔值和枚举值。多个参数之间使用英文逗号分隔，参数值中如需包含逗号，请改用专用配置项或升级连接器版本。
+
+例如，启用YStream容错，并透传`enableSequenceNextVal`和`mysqlMode`：
+
+```json
+{
+  "ystream.fault.tolerance": "true",
+  "ystream.additional.properties": "enable.sequence.next.val=true,mysql.mode=true"
+}
+```
+
+`ystream.additional.properties`中的参数必须是当前YStream客户端Builder实际支持的setter；如果参数名不存在、格式不是`name=value`或参数值类型不正确，连接器启动时会报告配置错误。连接器已明确配置的主机、端口、账号、恢复位点及YStream超时等参数不会被扩展参数覆盖。
 
 ### 数据类型映射
 
