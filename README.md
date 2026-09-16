@@ -17,6 +17,7 @@
 | --- | --- | --- |
 | 使用图形化或命令行 SQL 工具 | [SQL 工具](生态对接/00生态对接.md#sql-tools) | 根据工具选择 YashanDB JDBC 驱动或 MySQL 协议，并确认服务端模式和端口 |
 | 开发 Java 应用或 ORM 项目 | [Java ORM 文档](生态对接/00生态对接.md#orm-frameworks) | 准备 YashanDB JDBC 驱动；使用 Hibernate 时还需要对应方言 |
+| 使用 JDBC 连接池、SQL 解析或防火墙 | [Druid](生态对接/其他/Druid.md) | 准备 Druid（支持版本：1.2.29.1、1.2.7）和 YashanDB JDBC 驱动 |
 | 开发 Python 应用或 ORM 项目 | [Python ORM 文档](生态对接/00生态对接.md#orm-frameworks) | 准备 YashanDB Python 驱动和对应 ORM 方言 |
 | 开发 .NET 应用或 ORM 项目 | [Entity Framework 6](生态对接/ORM框架/EntityFramework6.md)、[Entity Framework Core 6](生态对接/ORM框架/EntityFrameworkCore6.md)、[SqlSugar](生态对接/ORM框架/SqlSugar.md) | 根据组件要求准备 ADO.NET、ODBC 驱动或适配包 |
 | 开发 Go 应用或 ORM 项目 | [GORM](生态对接/ORM框架/GORM.md) | 准备 YashanDB Go 驱动和 GORM 方言包 |
@@ -63,6 +64,7 @@
 
 | 组件 | 接入方式或场景 | 文档 |
 | --- | --- | --- |
+| Druid | JDBC 连接池、SQL 解析、监控和防火墙 | [查看文档](生态对接/其他/Druid.md) |
 | GeoServer | JDBC 驱动和 GeoServer 方言 | [查看文档](生态对接/其他/GeoServer.md) |
 
 ### 文档约定
